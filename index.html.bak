@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CIPHER</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0A2472;
+      --navy-dark: #071a54;
+      --navy-light: #1a3a8a;
+      --sky: #4A90D9;
+      --soft: #A8D4F5;
+      --white: #ffffff;
+      --bg: #f0f4fa;
+      --red: #e74c3c;
+      --green: #2e7d32;
+    }
+
+    body { font-family: 'Georgia', serif; background: var(--navy); overflow: hidden; }
+
+    /* ── SCREENS ── */
+    .screen { position: fixed; inset: 0; display: none; }
+    .screen.active { display: flex; }
+
+    /* ══════════════════════════════
+       SPLASH
+    ══════════════════════════════ */
+    #splash {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: -20%;
+      left: -20%;
+      width: 140%;
+      height: 140%;
+      z-index: 999;
+      background: var(--navy);
+      transition: transform 1.8s cubic-bezier(0.65,0,0.35,1);
+      will-change: transform;
+      backface-visibility: hidden;
+      transform: translateY(0) translateZ(0);
+      isolation: isolate;
+    }
+
+    #splash.slide-down {
+      transform: translateY(700%) translateZ(0);
+      pointer-events: none;
+    }
+
+    #logo-overlay {
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.8s ease, transform 1.6s cubic-bezier(0.6,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: scale(1);
+      transform-origin: center center;
+    }
+
+    #logo-overlay.visible { opacity: 1; transform: scale(1); }
+    #logo-overlay.zoom    { opacity: 1; transform: scale(40); }
+    #logo-overlay.zoom .splash-name { opacity: 0; transition: opacity 0.4s ease; }
+
+    .splash-name {
+      font-size: 64px;
+      font-weight: bold;
+      letter-spacing: 16px;
+      color: var(--white);
+      transition: opacity 0.5s ease;
+    }
+
+    .splash-hex {
+      width: 80px;
+      height: 92px;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    /* ══════════════════════════════
+       LOGIN
+    ══════════════════════════════ */
+    #login {
+      flex-direction: row;
+      height: 100vh;
+    }
+
+    .login-left {
+      width: 50%;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .login-left .brand-name {
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 12px;
+      color: var(--white);
+    }
+
+    .login-left .brand-tag {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--soft);
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 0 40px;
+      line-height: 1.8;
+    }
+
+    .login-divider {
+      width: 60px; height: 1px;
+      background: var(--sky);
+    }
+
+    .login-right {
+      width: 50%;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 60px;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    .login-right > div {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #portal-select {
+      margin: auto 0;
+    }
+
+    .login-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .login-sub {
+      font-size: 12px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+      margin-bottom: 40px;
+    }
+
+    .form-group {
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--navy);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 8px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #dde6f5;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--navy);
+      font-family: 'Georgia', serif;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--sky);
+    }
+
+    .btn-primary {
+      width: 100%;
+      max-width: 360px;
+      padding: 15px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover { background: var(--navy-light); }
+
+    .login-error {
+      color: var(--red);
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .portal-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      border: 1.5px solid #dde6f5;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .portal-card:hover {
+      border-color: var(--sky);
+      background: #f5f9ff;
+      transform: translateX(4px);
+    }
+
+    .portal-icon { font-size: 24px; color: var(--navy); flex-shrink: 0; }
+    .portal-title { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
+    .portal-desc { font-size: 11px; color: #aab8d0; font-family: 'Courier New', monospace; }
+    .portal-arrow { margin-left: auto; color: var(--sky); font-size: 18px; flex-shrink: 0; }
+    .back-btn { font-size: 11px; color: var(--sky); font-family: 'Courier New', monospace; letter-spacing: 1px; cursor: pointer; }
+    .back-btn:hover { color: var(--navy); }
+
+    /* ══════════════════════════════
+       SHARED DASHBOARD LAYOUT
+    ══════════════════════════════ */
+    #director-dash, #manager-dash {
+      flex-direction: row;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--navy-light);
+    }
+
+    .sidebar-brand {
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      color: var(--white);
+    }
+
+    .sidebar-role {
+      font-size: 8px;
+      color: var(--sky);
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      margin-top: 4px;
+    }
+
+    .nav-section-label {
+      padding: 20px 24px 6px;
+      font-size: 8px;
+      letter-spacing: 2.5px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+    }
+
+    .nav-item {
+      padding: 12px 24px;
+      color: var(--soft);
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--navy-light);
+      color: var(--white);
+    }
+
+    .nav-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--sky);
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px 24px;
+      border-top: 1px solid var(--navy-light);
+    }
+
+    .logout-btn {
+      font-size: 11px;
+      color: var(--soft);
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .logout-btn:hover { color: var(--white); }
+
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .topbar {
+      background: var(--white);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #dde6f5;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 17px;
+      font-weight: bold;
+      color: var(--navy);
+    }
+
+    .topbar-badge {
+      font-size: 11px;
+      color: var(--sky);
+      background: #eef5ff;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 32px;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    /* ── STAT CARDS ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 24px;
+      border-top: 3px solid var(--sky);
+    }
+
+    .card.danger { border-top-color: var(--red); }
+    .card.success { border-top-color: var(--green); }
+
+    .card-label {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 10px;
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--navy);
+    }
+
+    .card.danger .card-value { color: var(--red); }
+    .card.success .card-value { color: var(--green); }
+
+    .card-sub {
+      font-size: 11px;
+      color: #aab8d0;
+      margin-top: 6px;
+    }
+
+    /* ── TABLES ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--navy);
+      letter-spacing: 1.5px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .table-wrap {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead { background: var(--navy); }
+
+    thead th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--soft);
+      font-family: 'Courier New', monospace;
+      font-weight: normal;
+    }
+
+    tbody tr { border-bottom: 1px solid #f0f4fa; transition: background 0.2s; }
+    tbody tr:hover { background: #f8faff; }
+    tbody td { padding: 14px 20px; font-size: 13px; color: var(--navy); }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    .badge.submitted { background: #e8f5e9; color: var(--green); }
+    .badge.missing   { background: #fdecea; color: var(--red); }
+    .badge.flagged   { background: #fff8e1; color: #f57f17; }
+
+    /* ── REPORT BTN ── */
+    .btn-report {
+      padding: 10px 22px;
+      background: var(--navy);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-report:hover { background: var(--navy-light); }
+    .btn-report:disabled { background: #aab8d0; cursor: not-allowed; }
+
+    /* ── MANAGER SUBMIT FORM ── */
+    .submit-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 36px;
+      max-width: 600px;
+    }
+
+    .submit-card h2 {
+      font-size: 16px;
+      color: var(--navy);
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 6px;
+    }
+
+    .submit-card p {
+      font-size: 12px;
+      color: #aab8d0;
+      margin-bottom: 28px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--navy);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 8px;
+    }
+
+    .input-group input, .input-group textarea, .input-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #dde6f5;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--navy);
+      font-family: 'Georgia', serif;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .input-group input:focus, .input-group textarea:focus, .input-group select:focus {
+      border-color: var(--sky);
+    }
+
+    .input-group textarea { resize: vertical; min-height: 80px; }
+
+    .submit-success {
+      background: #e8f5e9;
+      border-radius: 8px;
+      padding: 16px 20px;
+      color: var(--green);
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
+      display: none;
+      margin-top: 16px;
+    }
+
+    /* ── AI INSIGHT BOX ── */
+    .ai-box {
+      background: var(--navy);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 32px;
+    }
+
+    .ai-label {
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 12px;
+    }
+
+    .ai-text {
+      font-size: 14px;
+      color: var(--white);
+      line-height: 1.7;
+    }
+
+    .ai-text span { color: var(--soft); }
+  </style>
+</head>
+<body>
+
+<!-- ══ SPLASH ══ -->
+<div id="splash">
+  <div id="logo-overlay">
+    <svg class="splash-hex" width="80" height="92" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:20px;">
+      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
+      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+      <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="splash-name">CIPHER</div>
+  </div>
+</div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login" class="screen">
+  <div class="login-left">
+    <svg width="70" height="80" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
+      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+      <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="brand-name">CIPHER</div>
+    <div class="login-divider"></div>
+    <div class="brand-tag">
+      CENTRAL INTELLIGENCE PLATFORM<br/>FOR HOLDINGS AND EXECUTIVE REPORTING
+    </div>
+  </div>
+  <div class="login-right">
+
+    <!-- PORTAL SELECTION -->
+    <div id="portal-select" style="display:flex;flex-direction:column;align-items:center;width:100%;">
+      <div class="login-title">Welcome to CIPHER</div>
+      <div class="login-sub">SELECT YOUR PORTAL TO CONTINUE</div>
+      <div style="display:flex;flex-direction:column;gap:16px;width:100%;max-width:360px;margin-top:16px;">
+        <div class="portal-card" onclick="showPortal('investment')">
+          <div class="portal-icon">⬡</div>
+          <div>
+            <div class="portal-title">Investment Manager Portal</div>
+            <div class="portal-desc">Monitor submissions, generate reports, AI insights</div>
+          </div>
+          <div class="portal-arrow">→</div>
+        </div>
+        <div class="portal-card" onclick="showPortal('manager')">
+          <div class="portal-icon">◈</div>
+          <div>
+            <div class="portal-title">Manager Portal</div>
+            <div class="portal-desc">Submit portfolio data by asset class</div>
+          </div>
+          <div class="portal-arrow">→</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVESTMENT MANAGER LOGIN -->
+    <div id="investment-login" style="display:none;width:100%;align-items:center;flex-direction:column;">
+      <div style="width:100%;max-width:360px;margin-bottom:24px;">
+        <span class="back-btn" onclick="showPortalSelect()">← Back</span>
+      </div>
+      <div class="login-title">Investment Manager Portal</div>
+      <div class="login-sub">SIGN IN TO YOUR ACCOUNT</div>
+      <div class="form-group">
+        <label>EMAIL ADDRESS</label>
+        <input type="email" id="inv-email" placeholder="you@institution.com"/>
+      </div>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="inv-password" placeholder="••••••••"/>
+      </div>
+      <button class="btn-primary" onclick="doLogin('investment_manager')">SIGN IN</button>
+      <div class="login-error" id="inv-error">Please enter your email and password.</div>
+      <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">
+        No account? <span class="back-btn" onclick="toggleSignup('investment')">Sign up</span>
+      </div>
+    </div>
+
+    <!-- INVESTMENT MANAGER SIGNUP -->
+    <div id="investment-signup" style="display:none;width:100%;align-items:center;flex-direction:column;">
+      <div style="width:100%;max-width:360px;margin-bottom:24px;">
+        <span class="back-btn" onclick="showPortalSelect()">← Back</span>
+      </div>
+      <div class="login-title">Create Investment Manager Account</div>
+      <div class="login-sub">SIGN UP TO GET STARTED</div>
+      <div class="form-group"><label>FULL NAME</label><input type="text" id="invsign-name" placeholder="Jane Smith"/></div>
+      <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="invsign-email" placeholder="you@institution.com"/></div>
+      <div class="form-group"><label>CONFIRM EMAIL</label><input type="email" id="invsign-email2" placeholder="you@institution.com"/></div>
+      <div class="form-group"><label>PASSWORD</label><input type="password" id="invsign-password" placeholder="••••••••"/></div>
+      <div class="form-group"><label>CONFIRM PASSWORD</label><input type="password" id="invsign-password2" placeholder="••••••••"/></div>
+      <div class="form-group"><label>JOB TITLE</label><input type="text" id="invsign-title" placeholder="Investment Operations Director"/></div>
+      <div class="form-group"><label>PHONE NUMBER</label><input type="tel" id="invsign-phone" placeholder="(555) 123-4567"/></div>
+      <div class="form-group"><label>INSTITUTION NAME</label><input type="text" id="invsign-institution" placeholder="Children's Health System"/></div>
+      <div class="form-group"><label>INSTITUTION LOCATION</label><input type="text" id="invsign-location" placeholder="Dallas, TX"/></div>
+      <button class="btn-primary" onclick="doSignup('investment_manager')">CREATE ACCOUNT</button>
+      <div class="login-error" id="invsign-error">Please fill in all fields.</div>
+      <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">
+        Already have an account? <span class="back-btn" onclick="toggleLogin('investment')">Sign in</span>
+      </div>
+    </div>
+
+    <!-- MANAGER LOGIN -->
+    <div id="manager-login" style="display:none;width:100%;align-items:center;flex-direction:column;">
+      <div style="width:100%;max-width:360px;margin-bottom:24px;">
+        <span class="back-btn" onclick="showPortalSelect()">← Back</span>
+      </div>
+      <div class="login-title">Manager Portal</div>
+      <div class="login-sub">SIGN IN TO YOUR ACCOUNT</div>
+      <div class="form-group">
+        <label>EMAIL ADDRESS</label>
+        <input type="email" id="mgr-email" placeholder="you@institution.com"/>
+      </div>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="mgr-password" placeholder="••••••••"/>
+      </div>
+      <button class="btn-primary" onclick="doLogin('manager')">SIGN IN</button>
+      <div class="login-error" id="mgr-error">Please fill in all fields.</div>
+      <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">
+        No account? <span class="back-btn" onclick="toggleSignup('manager')">Sign up</span>
+      </div>
+    </div>
+
+    <!-- MANAGER SIGNUP -->
+    <div id="manager-signup" style="display:none;width:100%;align-items:center;flex-direction:column;">
+      <div style="width:100%;max-width:360px;margin-bottom:24px;">
+        <span class="back-btn" onclick="showPortalSelect()">← Back</span>
+      </div>
+      <div class="login-title">Create Manager Account</div>
+      <div class="login-sub">SIGN UP TO GET STARTED</div>
+      <div class="form-group"><label>FULL NAME</label><input type="text" id="mgrsign-name" placeholder="John Doe"/></div>
+      <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="mgrsign-email" placeholder="you@institution.com"/></div>
+      <div class="form-group"><label>CONFIRM EMAIL</label><input type="email" id="mgrsign-email2" placeholder="you@institution.com"/></div>
+      <div class="form-group"><label>PASSWORD</label><input type="password" id="mgrsign-password" placeholder="••••••••"/></div>
+      <div class="form-group"><label>CONFIRM PASSWORD</label><input type="password" id="mgrsign-password2" placeholder="••••••••"/></div>
+      <div class="form-group"><label>INSTITUTION NAME</label><input type="text" id="mgrsign-institution" placeholder="Children's Health System"/></div>
+      <div class="form-group">
+        <label>ASSET CLASS</label>
+        <select id="mgrsign-asset">
+          <option value="">Select your asset class</option>
+          <option>Public Equity</option>
+          <option>Private Equity</option>
+          <option>Operations</option>
+          <option>Fixed Income</option>
+          <option>Real Assets</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="doSignup('manager')">CREATE ACCOUNT</button>
+      <div class="login-error" id="mgrsign-error">Please fill in all fields.</div>
+      <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">
+        Already have an account? <span class="back-btn" onclick="toggleLogin('manager')">Sign in</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ DIRECTOR DASHBOARD ══ -->
+<div id="director-dash" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">CIPHER</div>
+      <div class="sidebar-role">DIRECTOR PORTAL</div>
+    </div>
+    <div class="nav-section-label">OVERVIEW</div>
+    <div class="nav-item active" onclick="dirTab(this,'dir-overview')"><span class="nav-dot"></span>Dashboard</div>
+    <div class="nav-item" onclick="dirTab(this,'dir-submissions')"><span class="nav-dot"></span>Submissions</div>
+    <div class="nav-section-label">INTELLIGENCE</div>
+    <div class="nav-item" onclick="dirTab(this,'dir-ai')"><span class="nav-dot"></span>AI Insights</div>
+    <div class="nav-item" onclick="dirTab(this,'dir-report')"><span class="nav-dot"></span>Generate Report</div>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="logout()">⎋ SIGN OUT</div>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <div class="topbar-title">Investment Operations Dashboard</div>
+      <div class="topbar-badge">Q2 2026</div>
+    </div>
+    <div class="content">
+
+      <!-- OVERVIEW TAB -->
+      <div id="dir-overview">
+        <div class="cards">
+          <div class="card">
+            <div class="card-label">TOTAL INVESTED</div>
+            <div class="card-value">$48.2M</div>
+            <div class="card-sub">Across all managers</div>
+          </div>
+          <div class="card success">
+            <div class="card-label">TOTAL GAINED</div>
+            <div class="card-value">$6.1M</div>
+            <div class="card-sub">This period</div>
+          </div>
+          <div class="card">
+            <div class="card-label">SUBMITTED</div>
+            <div class="card-value">7 / 9</div>
+            <div class="card-sub">Managers reported</div>
+          </div>
+          <div class="card danger">
+            <div class="card-label">MISSING</div>
+            <div class="card-value">2</div>
+            <div class="card-sub">Report incomplete</div>
+          </div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">MANAGER SUBMISSIONS — Q2 2026</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>MANAGER</th>
+                <th>INVESTED</th>
+                <th>GAINED</th>
+                <th>LOST</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Sarah Johnson</td><td>$8,400,000</td><td>$1,200,000</td><td>$80,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Marcus Williams</td><td>$6,100,000</td><td>$890,000</td><td>$45,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Priya Patel</td><td>$9,200,000</td><td>$1,450,000</td><td>$120,000</td><td><span class="badge flagged">FLAGGED ⚠</span></td></tr>
+              <tr><td>James Carter</td><td>—</td><td>—</td><td>—</td><td><span class="badge missing">MISSING</span></td></tr>
+              <tr><td>Linda Torres</td><td>$5,800,000</td><td>$720,000</td><td>$30,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>David Kim</td><td>—</td><td>—</td><td>—</td><td><span class="badge missing">MISSING</span></td></tr>
+              <tr><td>Rachel Nguyen</td><td>$7,100,000</td><td>$980,000</td><td>$55,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Omar Hassan</td><td>$5,400,000</td><td>$610,000</td><td>$20,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Emily Brooks</td><td>$6,200,000</td><td>$780,000</td><td>$40,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBMISSIONS TAB -->
+      <div id="dir-submissions" style="display:none">
+        <div class="section-header">
+          <div class="section-title">ALL SUBMISSIONS</div>
+          <button class="btn-report" id="report-btn" disabled>REPORT LOCKED — 2 MISSING</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>MANAGER</th><th>PERIOD</th><th>INVESTED</th><th>GAINED</th><th>LOST</th><th>NET</th><th>SUBMITTED AT</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Sarah Johnson</td><td>Q2 2026</td><td>$8,400,000</td><td>$1,200,000</td><td>$80,000</td><td style="color:#2e7d32">+$1,120,000</td><td>Jun 28, 2026 9:14AM</td></tr>
+              <tr><td>Marcus Williams</td><td>Q2 2026</td><td>$6,100,000</td><td>$890,000</td><td>$45,000</td><td style="color:#2e7d32">+$845,000</td><td>Jun 28, 2026 10:02AM</td></tr>
+              <tr><td>Priya Patel</td><td>Q2 2026</td><td>$9,200,000</td><td>$1,450,000</td><td>$120,000</td><td style="color:#2e7d32">+$1,330,000</td><td>Jun 29, 2026 8:45AM</td></tr>
+              <tr><td>Linda Torres</td><td>Q2 2026</td><td>$5,800,000</td><td>$720,000</td><td>$30,000</td><td style="color:#2e7d32">+$690,000</td><td>Jun 29, 2026 9:30AM</td></tr>
+              <tr><td>Rachel Nguyen</td><td>Q2 2026</td><td>$7,100,000</td><td>$980,000</td><td>$55,000</td><td style="color:#2e7d32">+$925,000</td><td>Jun 29, 2026 11:00AM</td></tr>
+              <tr><td>Omar Hassan</td><td>Q2 2026</td><td>$5,400,000</td><td>$610,000</td><td>$20,000</td><td style="color:#2e7d32">+$590,000</td><td>Jun 29, 2026 11:45AM</td></tr>
+              <tr><td>Emily Brooks</td><td>Q2 2026</td><td>$6,200,000</td><td>$780,000</td><td>$40,000</td><td style="color:#2e7d32">+$740,000</td><td>Jun 29, 2026 2:10PM</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AI TAB -->
+      <div id="dir-ai" style="display:none">
+        <div class="ai-box">
+          <div class="ai-label">⬡ CIPHER AI — PORTFOLIO INTELLIGENCE</div>
+          <div class="ai-text">
+            Portfolio performance for <span>Q2 2026</span> is trending <span>8.4% above</span> the prior quarter average.
+            Priya Patel's submission has been <span>flagged for review</span> — her loss ratio of 7.6% is significantly
+            higher than the portfolio average of 3.2%. Two managers have not yet submitted.
+            The report cannot be finalized until <span>James Carter</span> and <span>David Kim</span> submit their data.
+            <br/><br/>
+            Recommendation: Send automated reminders to missing managers. Current complete portfolio value stands at
+            <span>$48.2M</span> with a net gain of <span>$6.1M</span> across 7 submitted managers.
+          </div>
+        </div>
+        <div class="section-header">
+          <div class="section-title">ANOMALY FLAGS</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>MANAGER</th><th>FLAG</th><th>DETAIL</th><th>SEVERITY</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Priya Patel</td><td>High Loss Ratio</td><td>Loss ratio 7.6% vs avg 3.2%</td><td><span class="badge flagged">REVIEW</span></td></tr>
+              <tr><td>James Carter</td><td>No Submission</td><td>Deadline passed 48hrs ago</td><td><span class="badge missing">URGENT</span></td></tr>
+              <tr><td>David Kim</td><td>No Submission</td><td>Deadline passed 48hrs ago</td><td><span class="badge missing">URGENT</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REPORT TAB -->
+      <div id="dir-report" style="display:none">
+        <div class="submit-card">
+          <h2>GENERATE EXECUTIVE REPORT</h2>
+          <p>Reports can only be generated when all managers have submitted. Currently 2 submissions are missing.</p>
+          <div class="input-row">
+            <div class="input-group">
+              <label>PERIOD</label>
+              <select><option>Q2 2026</option><option>Q1 2026</option></select>
+            </div>
+            <div class="input-group">
+              <label>FORMAT</label>
+              <select><option>PDF Summary</option><option>Full Detail</option></select>
+            </div>
+          </div>
+          <button class="btn-primary" style="max-width:100%;opacity:0.5;cursor:not-allowed">REPORT LOCKED — AWAITING 2 SUBMISSIONS</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANAGER DASHBOARD ══ -->
+<div id="manager-dash" class="screen">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">CIPHER</div>
+      <div class="sidebar-role">MANAGER PORTAL</div>
+    </div>
+    <div class="nav-section-label">MY PORTFOLIO</div>
+    <div class="nav-item active" onclick="mgrTab(this,'mgr-submit')"><span class="nav-dot"></span>Submit Data</div>
+    <div class="nav-item" onclick="mgrTab(this,'mgr-history')"><span class="nav-dot"></span>My History</div>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="logout()">⎋ SIGN OUT</div>
+    </div>
+  </div>
+  <div class="main-area">
+    <div class="topbar">
+      <div class="topbar-title">Manager Portfolio Submission</div>
+      <div class="topbar-badge">Q2 2026</div>
+    </div>
+    <div class="content">
+
+      <!-- SUBMIT TAB -->
+      <div id="mgr-submit">
+        <div class="submit-card">
+          <h2>SUBMIT PORTFOLIO DATA</h2>
+          <p>Enter your portfolio figures for the current reporting period. All fields are required.</p>
+          <div class="input-row">
+            <div class="input-group">
+              <label>REPORTING PERIOD</label>
+              <select><option>Q2 2026</option><option>Q1 2026</option></select>
+            </div>
+            <div class="input-group">
+              <label>TOTAL INVESTED ($)</label>
+              <input type="number" placeholder="0.00" id="m-invested"/>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>TOTAL GAINED ($)</label>
+              <input type="number" placeholder="0.00" id="m-gained"/>
+            </div>
+            <div class="input-group">
+              <label>TOTAL LOST ($)</label>
+              <input type="number" placeholder="0.00" id="m-lost"/>
+            </div>
+          </div>
+          <div class="input-group" style="margin-bottom:24px">
+            <label>NOTES (OPTIONAL)</label>
+            <textarea placeholder="Any additional context for this period..."></textarea>
+          </div>
+          <button class="btn-primary" style="max-width:100%" onclick="submitData()">SUBMIT PORTFOLIO DATA</button>
+          <div class="submit-success" id="submit-success">
+            ✓ Submission received. Your data has been recorded for Q2 2026.
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="mgr-history" style="display:none">
+        <div class="section-header">
+          <div class="section-title">MY SUBMISSION HISTORY</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>PERIOD</th><th>INVESTED</th><th>GAINED</th><th>LOST</th><th>NET</th><th>SUBMITTED</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Q1 2026</td><td>$7,800,000</td><td>$1,100,000</td><td>$60,000</td><td style="color:#2e7d32">+$1,040,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Q4 2025</td><td>$7,200,000</td><td>$980,000</td><td>$75,000</td><td style="color:#2e7d32">+$905,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+              <tr><td>Q3 2025</td><td>$6,900,000</td><td>$840,000</td><td>$90,000</td><td style="color:#2e7d32">+$750,000</td><td><span class="badge submitted">SUBMITTED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── SPLASH ANIMATION ──
+  window.addEventListener('load', () => {
+    const overlay = document.getElementById('logo-overlay');
+    const splash  = document.getElementById('splash');
+
+    show('login'); // login is ready underneath from the start
+
+    setTimeout(() => overlay.classList.add('visible'), 300);     // logo fades in
+    setTimeout(() => overlay.classList.add('zoom'), 1800);        // hex zooms to fill any screen size
+    setTimeout(() => splash.classList.add('slide-down'), 3400);   // navy + giant hex drag all the way down
+    setTimeout(() => splash.remove(), 5400);
+  });
+
+  // ── SCREEN MANAGEMENT ──
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) el.classList.add('active');
+  }
+
+  const API = "http://127.0.0.1:8000";
+  let currentUser = null;
+
+  // ── PORTAL NAVIGATION ──
+  function showPortal(type) {
+    document.getElementById('portal-select').style.display = 'none';
+    document.getElementById('investment-login').style.display = type === 'investment' ? 'flex' : 'none';
+    document.getElementById('manager-login').style.display = type === 'manager' ? 'flex' : 'none';
+    document.querySelector('.login-right').scrollTop = 0;
+  }
+
+  function showPortalSelect() {
+    document.getElementById('portal-select').style.display = 'flex';
+    document.getElementById('portal-select').style.flexDirection = 'column';
+    document.getElementById('portal-select').style.alignItems = 'center';
+    document.getElementById('investment-login').style.display = 'none';
+    document.getElementById('investment-signup').style.display = 'none';
+    document.getElementById('manager-login').style.display = 'none';
+    document.getElementById('manager-signup').style.display = 'none';
+    document.querySelector('.login-right').scrollTop = 0;
+  }
+
+  function toggleSignup(type) {
+    document.getElementById(type + '-login').style.display = 'none';
+    document.getElementById(type + '-signup').style.display = 'flex';
+    document.querySelector('.login-right').scrollTop = 0;
+  }
+
+  function toggleLogin(type) {
+    document.getElementById(type + '-signup').style.display = 'none';
+    document.getElementById(type + '-login').style.display = 'flex';
+    document.querySelector('.login-right').scrollTop = 0;
+  }
+
+  // ── SIGNUP ──
+  async function doSignup(role) {
+    const prefix = role === 'investment_manager' ? 'invsign' : 'mgrsign';
+    const name = document.getElementById(prefix + '-name').value.trim();
+    const email = document.getElementById(prefix + '-email').value.trim();
+    const email2 = document.getElementById(prefix + '-email2').value.trim();
+    const password = document.getElementById(prefix + '-password').value;
+    const password2 = document.getElementById(prefix + '-password2').value;
+    const institution_name = document.getElementById(prefix + '-institution').value.trim();
+    const errorEl = document.getElementById(prefix + '-error');
+
+    let asset_class = null, job_title = null, phone_number = null, institution_location = null;
+
+    if (role === 'manager') {
+      asset_class = document.getElementById('mgrsign-asset').value;
+    } else {
+      job_title = document.getElementById('invsign-title').value.trim();
+      phone_number = document.getElementById('invsign-phone').value.trim();
+      institution_location = document.getElementById('invsign-location').value.trim();
+    }
+
+    // Validation
+    if (!name || !email || !email2 || !password || !password2 || !institution_name) {
+      errorEl.textContent = "Please fill in all required fields.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (role === 'manager' && !asset_class) {
+      errorEl.textContent = "Please select an asset class.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (role === 'investment_manager' && (!job_title || !phone_number || !institution_location)) {
+      errorEl.textContent = "Please fill in all required fields.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (email !== email2) {
+      errorEl.textContent = "Email addresses do not match.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (password !== password2) {
+      errorEl.textContent = "Passwords do not match.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (password.length < 8) {
+      errorEl.textContent = "Password must be at least 8 characters.";
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/signup`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name, email, password, role, asset_class,
+          institution_name, institution_location, job_title, phone_number
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorEl.textContent = data.detail || "Signup failed.";
+        errorEl.style.display = 'block';
+        return;
+      }
+      errorEl.style.display = 'none';
+      currentUser = { user_id: data.user_id, name: data.name, role: data.role, asset_class: data.asset_class };
+      enterDashboard();
+    } catch (e) {
+      errorEl.textContent = "Could not connect to server.";
+      errorEl.style.display = 'block';
+    }
+  }
+
+  // ── LOGIN ──
+  async function doLogin(role) {
+    const prefix = role === 'investment_manager' ? 'inv' : 'mgr';
+    const email = document.getElementById(prefix + '-email').value;
+    const password = document.getElementById(prefix + '-password').value;
+    const errorEl = document.getElementById(prefix + '-error');
+
+    if (!email || !password) {
+      errorEl.textContent = "Please fill in all fields.";
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, password, role })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorEl.textContent = data.detail || "Invalid credentials.";
+        errorEl.style.display = 'block';
+        return;
+      }
+      errorEl.style.display = 'none';
+      currentUser = data;
+      enterDashboard();
+    } catch (e) {
+      errorEl.textContent = "Could not connect to server.";
+      errorEl.style.display = 'block';
+    }
+  }
+
+  function enterDashboard() {
+    if (currentUser.role === 'investment_manager') {
+      show('director-dash');
+      loadDirectorData();
+    } else {
+      show('manager-dash');
+      loadManagerHistory();
+    }
+  }
+
+  // ── DIRECTOR TABS ──
+  function dirTab(el, tabId) {
+    document.querySelectorAll('#director-dash .nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    ['dir-overview','dir-submissions','dir-ai','dir-report'].forEach(id => {
+      const t = document.getElementById(id);
+      if (t) t.style.display = id === tabId ? 'block' : 'none';
+    });
+  }
+
+  // ── MANAGER TABS ──
+  function mgrTab(el, tabId) {
+    document.querySelectorAll('#manager-dash .nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    ['mgr-submit','mgr-history'].forEach(id => {
+      const t = document.getElementById(id);
+      if (t) t.style.display = id === tabId ? 'block' : 'none';
+    });
+  }
+
+  // ── SUBMIT DATA (REAL API CALL) ──
+  async function submitData() {
+    const invested = document.getElementById('m-invested').value;
+    const gained   = document.getElementById('m-gained').value;
+    const lost     = document.getElementById('m-lost').value;
+    if (!invested || !gained || !lost || !currentUser) return;
+
+    try {
+      const res = await fetch(`${API}/submissions/submit`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          manager_id: currentUser.user_id,
+          total_invested: parseFloat(invested),
+          total_gained: parseFloat(gained),
+          total_lost: parseFloat(lost),
+          period: "Q2 2026"
+        })
+      });
+      if (res.ok) {
+        document.getElementById('submit-success').style.display = 'block';
+        loadManagerHistory();
+      }
+    } catch (e) {
+      console.error("Submission failed", e);
+    }
+  }
+
+  // ── LOAD MANAGER HISTORY ──
+  async function loadManagerHistory() {
+    if (!currentUser) return;
+    try {
+      const res = await fetch(`${API}/submissions/manager/${currentUser.user_id}`);
+      const data = await res.json();
+      const tbody = document.querySelector('#mgr-history tbody');
+      if (!tbody) return;
+      tbody.innerHTML = data.submissions.map(s => `
+        <tr>
+          <td>${s.period}</td>
+          <td>$${Number(s.total_invested).toLocaleString()}</td>
+          <td>$${Number(s.total_gained).toLocaleString()}</td>
+          <td>$${Number(s.total_lost).toLocaleString()}</td>
+          <td style="color:#2e7d32">+$${(s.total_gained - s.total_lost).toLocaleString()}</td>
+          <td><span class="badge submitted">SUBMITTED</span></td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      console.error("Could not load history", e);
+    }
+  }
+
+  // ── LOAD DIRECTOR DATA ──
+  async function loadDirectorData() {
+    try {
+      const res = await fetch(`${API}/submissions/Q2 2026`);
+      const data = await res.json();
+
+      // Update stat cards
+      const cards = document.querySelectorAll('#dir-overview .card-value');
+      const totalInvested = data.managers.reduce((sum, m) => sum + (m.total_invested || 0), 0);
+      const totalGained = data.managers.reduce((sum, m) => sum + (m.total_gained || 0), 0);
+      if (cards[0]) cards[0].textContent = `$${(totalInvested/1000000).toFixed(1)}M`;
+      if (cards[1]) cards[1].textContent = `$${(totalGained/1000000).toFixed(1)}M`;
+      if (cards[2]) cards[2].textContent = `${data.submitted} / ${data.total_managers}`;
+      if (cards[3]) cards[3].textContent = data.missing;
+
+      // Update table
+      const tbody = document.querySelector('#dir-overview .table-wrap tbody');
+      if (tbody) {
+        tbody.innerHTML = data.managers.map(m => `
+          <tr>
+            <td>${m.name} ${m.asset_class ? '· ' + m.asset_class : ''}</td>
+            <td>${m.submitted ? '$' + Number(m.total_invested).toLocaleString() : '—'}</td>
+            <td>${m.submitted ? '$' + Number(m.total_gained).toLocaleString() : '—'}</td>
+            <td>${m.submitted ? '$' + Number(m.total_lost).toLocaleString() : '—'}</td>
+            <td><span class="badge ${m.submitted ? 'submitted' : 'missing'}">${m.submitted ? 'SUBMITTED' : 'MISSING'}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Update report lock button
+      const reportBtn = document.getElementById('report-btn');
+      if (reportBtn) {
+        reportBtn.disabled = !data.complete;
+        reportBtn.textContent = data.complete ? 'GENERATE REPORT' : `REPORT LOCKED — ${data.missing} MISSING`;
+      }
+    } catch (e) {
+      console.error("Could not load director data", e);
+    }
+  }
+</script>
+</body>
+</html>

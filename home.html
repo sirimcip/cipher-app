@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CIPHER</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0A2472;
+      --navy-light: #1a3a8a;
+      --sky: #4A90D9;
+      --soft: #A8D4F5;
+      --white: #ffffff;
+      --bg: #f0f4fa;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 60px;
+      border-bottom: 1px solid rgba(74,144,217,0.2);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .nav-brand {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: var(--white);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .nav-link {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--soft);
+      font-family: 'Courier New', monospace;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--white); }
+
+    /* ── HERO ── */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 60px 60px;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: 72px;
+      font-weight: bold;
+      letter-spacing: 16px;
+      color: var(--white);
+      margin-bottom: 24px;
+      line-height: 1;
+    }
+
+    .hero-divider {
+      width: 60px;
+      height: 1px;
+      background: var(--sky);
+      margin: 0 auto 28px;
+    }
+
+    .hero-tagline {
+      font-size: 16px;
+      color: var(--soft);
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      font-style: italic;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: rgba(168,212,245,0.7);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+      max-width: 560px;
+      line-height: 1.8;
+      margin-bottom: 72px;
+    }
+
+    /* ── PRODUCT CARDS ── */
+    .products {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .product-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(74,144,217,0.25);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .product-card:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--sky);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .product-card.connect:hover {
+      border-color: var(--soft);
+    }
+
+    .product-icon {
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .product-label {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+    }
+
+    .product-card.connect .product-label {
+      color: var(--soft);
+    }
+
+    .product-name {
+      font-size: 26px;
+      font-weight: bold;
+      color: var(--white);
+      letter-spacing: 2px;
+    }
+
+    .product-desc {
+      font-size: 12px;
+      color: rgba(168,212,245,0.7);
+      font-family: 'Courier New', monospace;
+      line-height: 1.8;
+      letter-spacing: 0.5px;
+    }
+
+    .product-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(74,144,217,0.15);
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--sky);
+      font-family: 'Courier New', monospace;
+      transition: gap 0.2s;
+    }
+
+    .product-card.connect .product-cta {
+      color: var(--soft);
+    }
+
+    .product-card:hover .product-cta {
+      gap: 12px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 60px;
+      border-top: 1px solid rgba(74,144,217,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-copy {
+      font-size: 10px;
+      color: rgba(168,212,245,0.4);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-link {
+      font-size: 10px;
+      color: rgba(168,212,245,0.4);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover { color: var(--soft); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      nav { padding: 20px 24px; }
+      .hero { padding: 60px 24px 40px; }
+      .hero-title { font-size: 42px; letter-spacing: 8px; }
+      .products { grid-template-columns: 1fr; max-width: 100%; }
+      footer { flex-direction: column; gap: 12px; text-align: center; padding: 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <svg width="32" height="37" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
+        <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+        <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="nav-brand">CIPHER</div>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="/platform">Platform</a>
+      <a class="nav-link" href="/connect">Connect</a>
+      <a class="nav-link" href="#">About</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">CENTRAL INTELLIGENCE PLATFORM FOR HOLDINGS AND EXECUTIVE REPORTING</div>
+    <div class="hero-title">CIPHER</div>
+    <div class="hero-divider"></div>
+    <div class="hero-tagline">Institutional intelligence, simplified.</div>
+    <div class="hero-desc">
+      One platform for institutional portfolio reporting and investment discovery.
+      Built for the organizations that move capital — and the people who find it.
+    </div>
+
+    <!-- PRODUCT CARDS -->
+    <div class="products">
+
+      <a class="product-card" href="/platform">
+        <div class="product-icon">⬡</div>
+        <div class="product-label">CIPHER — PLATFORM</div>
+        <div class="product-name">The Platform</div>
+        <div class="product-desc">
+          Portfolio reporting and management for hospitals, nonprofits, and institutional investors.
+          Submit data, track performance, and generate executive reports — all in one place.
+        </div>
+        <div class="product-cta">Enter Platform →</div>
+      </a>
+
+      <a class="product-card connect" href="/connect">
+        <div class="product-icon">◈</div>
+        <div class="product-label">CIPHER — CONNECT</div>
+        <div class="product-name">Connect</div>
+        <div class="product-desc">
+          Discover and connect with VC and private equity firms.
+          A verified network where investors find opportunity and firms find capital.
+        </div>
+        <div class="product-cta">Enter Connect →</div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-copy">© 2026 CIPHER. ALL RIGHTS RESERVED.</div>
+    <div class="footer-links">
+      <div class="footer-link">Privacy</div>
+      <div class="footer-link">Terms</div>
+      <div class="footer-link">Contact</div>
+    </div>
+  </footer>
+
+</body>
+</html>
