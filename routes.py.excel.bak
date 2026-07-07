@@ -1,0 +1,277 @@
+import urllib.request
+import json as json_lib
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import get_db, User, Submission, hash_password, verify_password
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
+
+router = APIRouter()
+
+# ── INPUT MODELS ──
+class SignupRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+    role: str  # "manager" or "investment_manager"
+    asset_class: Optional[str] = None
+    institution_name: Optional[str] = None
+    institution_location: Optional[str] = None
+    job_title: Optional[str] = None
+    phone_number: Optional[str] = None
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+    role: str
+
+class SubmissionCreate(BaseModel):
+    manager_id: int
+    total_invested: float
+    total_gained: float
+    total_lost: float
+    notes: Optional[str] = None
+    period: str
+
+# ── SIGNUP ──
+@router.post("/auth/signup")
+def signup(data: SignupRequest, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_user = User(
+        name=data.name,
+        email=data.email,
+        password_hash=hash_password(data.password),
+        role=data.role,
+        asset_class=data.asset_class,
+        institution_name=data.institution_name,
+        institution_location=data.institution_location,
+        job_title=data.job_title,
+        phone_number=data.phone_number
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {
+        "message": "Account created",
+        "user_id": new_user.id,
+        "name": new_user.name,
+        "role": new_user.role,
+        "asset_class": new_user.asset_class
+    }
+
+# ── LOGIN ──
+@router.post("/auth/login")
+def login(data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email, User.role == data.role).first()
+    if not user or not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    return {
+        "message": "Login successful",
+        "user_id": user.id,
+        "name": user.name,
+        "role": user.role,
+        "asset_class": user.asset_class
+    }
+
+# ── SUBMIT PORTFOLIO DATA ──
+@router.post("/submissions/submit")
+def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
+    existing = db.query(Submission).filter(
+        Submission.manager_id == data.manager_id,
+        Submission.period == data.period
+    ).first()
+
+    if existing:
+        existing.total_invested = data.total_invested
+        existing.total_gained = data.total_gained
+        existing.total_lost = data.total_lost
+        existing.notes = data.notes
+        existing.submitted = True
+        existing.submitted_at = datetime.utcnow()
+        db.commit()
+        return {"message": "Submission updated"}
+
+    submission = Submission(
+        manager_id=data.manager_id,
+        total_invested=data.total_invested,
+        total_gained=data.total_gained,
+        total_lost=data.total_lost,
+        notes=data.notes,
+        period=data.period,
+        submitted=True,
+        submitted_at=datetime.utcnow()
+    )
+    db.add(submission)
+    db.commit()
+    return {"message": "Submission successful"}
+
+# ── GET ALL SUBMISSIONS FOR A PERIOD (DIRECTOR VIEW) ──
+@router.get("/submissions/{period}")
+def get_submissions(period: str, db: Session = Depends(get_db)):
+    all_managers = db.query(User).filter(User.role == "manager").all()
+    submissions = db.query(Submission).filter(Submission.period == period).all()
+
+    total_managers = len(all_managers)
+    submitted_count = len(submissions)
+    missing = total_managers - submitted_count
+
+    manager_status = []
+    for m in all_managers:
+        sub = next((s for s in submissions if s.manager_id == m.id), None)
+        manager_status.append({
+            "manager_id": m.id,
+            "name": m.name,
+            "asset_class": m.asset_class,
+            "submitted": sub is not None,
+            "total_invested": sub.total_invested if sub else None,
+            "total_gained": sub.total_gained if sub else None,
+            "total_lost": sub.total_lost if sub else None,
+            "submitted_at": sub.submitted_at if sub else None
+        })
+
+    return {
+        "period": period,
+        "total_managers": total_managers,
+        "submitted": submitted_count,
+        "missing": missing,
+        "complete": missing == 0,
+        "managers": manager_status
+    }
+
+# ── GET MY SUBMISSION HISTORY (MANAGER VIEW) ──
+@router.get("/submissions/manager/{manager_id}")
+def get_manager_submissions(manager_id: int, db: Session = Depends(get_db)):
+    submissions = db.query(Submission).filter(Submission.manager_id == manager_id).all()
+    return {
+        "submissions": [
+            {
+                "period": s.period,
+                "total_invested": s.total_invested,
+                "total_gained": s.total_gained,
+                "total_lost": s.total_lost,
+                "submitted_at": s.submitted_at
+            } for s in submissions
+        ]
+    }
+
+
+def _period_sort_key(period: str):
+    """Turns 'Q2 2026' into (2026, 2) so periods sort chronologically, not alphabetically."""
+    try:
+        q_part, year_part = period.split(" ")
+        quarter = int(q_part.replace("Q", ""))
+        year = int(year_part)
+        return (year, quarter)
+    except (ValueError, AttributeError):
+        return (9999, 9)
+
+
+# ── GET FULL SUBMISSION HISTORY ACROSS ALL PERIODS (FOR CHARTS) ──
+@router.get("/submissions/history/all")
+def get_all_submission_history(db: Session = Depends(get_db)):
+    submissions = db.query(Submission).filter(Submission.submitted == True).all()
+
+    history = []
+    for s in submissions:
+        manager = db.query(User).filter(User.id == s.manager_id).first()
+        if not manager:
+            continue
+        net_change = s.total_gained - s.total_lost
+        pct_return = (net_change / s.total_invested * 100) if s.total_invested else 0
+        cumulative_value = s.total_invested + net_change
+
+        history.append({
+            "manager_id": s.manager_id,
+            "manager_name": manager.name,
+            "asset_class": manager.asset_class,
+            "period": s.period,
+            "total_invested": s.total_invested,
+            "total_gained": s.total_gained,
+            "total_lost": s.total_lost,
+            "net_change": net_change,
+            "pct_return": round(pct_return, 2),
+            "cumulative_value": cumulative_value
+        })
+
+    history.sort(key=lambda h: _period_sort_key(h["period"]))
+
+    return {"history": history}
+
+
+# ── MARKET DATA PROXY (Alpha Vantage) ──
+AV_KEY = "JPSR2HXKEFAJ9M3W"
+AV_BASE = "https://www.alphavantage.co/query"
+
+@router.get("/market/quote/{symbol}")
+def get_quote(symbol: str):
+    try:
+        url = f"{AV_BASE}?function=GLOBAL_QUOTE&symbol={symbol}&apikey={AV_KEY}"
+        with urllib.request.urlopen(url, timeout=8) as r:
+            data = json_lib.loads(r.read())
+        return data.get("Global Quote", {})
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.get("/market/treasury/{maturity}")
+def get_treasury(maturity: str):
+    try:
+        url = f"{AV_BASE}?function=TREASURY_YIELD&interval=monthly&maturity={maturity}&apikey={AV_KEY}"
+        with urllib.request.urlopen(url, timeout=8) as r:
+            data = json_lib.loads(r.read())
+        items = data.get("data", [])
+        return {"value": items[0]["value"] if items else None}
+    except Exception as e:
+        return {"error": str(e)}
+
+@router.get("/market/cpi")
+def get_cpi():
+    try:
+        url = f"{AV_BASE}?function=CPI&interval=monthly&apikey={AV_KEY}"
+        with urllib.request.urlopen(url, timeout=8) as r:
+            data = json_lib.loads(r.read())
+        items = data.get("data", [])
+        return {"value": items[0]["value"] if items else None}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+# ── CIPHER AI CHAT ENDPOINT (Groq) ──
+import httpx as _httpx
+from fastapi import Request as _Request
+from pydantic import BaseModel as _BaseModel
+from typing import List as _List
+
+class AIMessage(_BaseModel):
+    messages: _List[dict]
+    system: str
+
+@router.post("/ai/chat")
+async def ai_chat(data: AIMessage):
+    try:
+        # Prepend system message for Groq (uses messages format)
+        msgs = [{"role": "system", "content": data.system}] + data.messages
+        async with _httpx.AsyncClient() as client:
+            res = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": "Bearer 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",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "max_tokens": 1000,
+                    "messages": msgs
+                },
+                timeout=30
+            )
+        data_resp = res.json()
+        # Return in Anthropic-style format so frontend works unchanged
+        text = data_resp.get("choices", [{}])[0].get("message", {}).get("content", "")
+        return {"content": [{"type": "text", "text": text}]}
+    except Exception as e:
+        return {"content": [{"type": "text", "text": f"Error: {str(e)}"}]}
