@@ -1108,7 +1108,7 @@
       const data = await res.json();
       if (!res.ok) { errorEl.textContent = data.detail || "Signup failed."; errorEl.style.display = 'block'; return; }
       errorEl.style.display = 'none';
-      pendingUser = { user_id: data.user_id, name: data.name, role: data.role, asset_class: data.asset_class, email: email };
+      pendingUser = { user_id: data.user_id, name: data.name, role: data.role, asset_class: data.asset_class, email: email, institution_name: data.institution_name };
       sendVerificationCode(pendingUser);
       document.getElementById('twofa-hint').textContent = 'Account created! Check your email for your verification code.';
       document.getElementById('twofa-code').value = '';
@@ -1240,7 +1240,8 @@
   // ══ LOAD DIRECTOR DATA ══
   async function loadDirectorData() {
     try {
-      const res  = await fetch(`${API}/submissions/Q2 2026`);
+      const inst = encodeURIComponent(currentUser.institution_name || '');
+      const res  = await fetch(`${API}/submissions/Q2 2026?institution=${inst}`);
       const data = await res.json();
 
       const totalInvested = data.managers.reduce((s, m) => s + (m.total_invested || 0), 0);
@@ -1296,7 +1297,8 @@
 
   async function fetchFullHistory() {
     try {
-      const res  = await fetch(`${API}/submissions/history/all`);
+      const inst = encodeURIComponent(currentUser.institution_name || '');
+      const res  = await fetch(`${API}/submissions/history/all?institution=${inst}`);
       const data = await res.json();
       fullHistory = data.history || [];
     } catch (e) { fullHistory = []; }
