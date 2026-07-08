@@ -459,7 +459,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr><th>ASSET CLASS</th><th>VALUE</th><th>WEIGHT</th><th>RETURN (YTD)</th><th>BENCHMARK</th><th>ALPHA</th></tr></thead>
-            <tbody>
+            <tbody id="analytics-tbody">
               <tr><td>Public Equity</td><td>$42.1M</td><td>33.8%</td><td style="color:#2e7d32">+11.2%</td><td>9.4%</td><td style="color:#2e7d32">+1.8%</td></tr>
               <tr><td>Private Equity</td><td>$31.5M</td><td>25.3%</td><td style="color:#2e7d32">+9.8%</td><td>8.1%</td><td style="color:#2e7d32">+1.7%</td></tr>
               <tr><td>Fixed Income</td><td>$24.8M</td><td>19.9%</td><td style="color:#2e7d32">+4.1%</td><td>3.8%</td><td style="color:#2e7d32">+0.3%</td></tr>
@@ -494,7 +494,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr><th>SECTOR</th><th>EXPOSURE</th><th>% OF PORTFOLIO</th><th>LONG</th><th>SHORT</th><th>NET</th></tr></thead>
-            <tbody>
+            <tbody id="exposure-tbody">
               <tr><td>Healthcare</td><td>$43.6M</td><td>35.0%</td><td>$43.6M</td><td>—</td><td style="color:#2e7d32">$43.6M</td></tr>
               <tr><td>Technology</td><td>$24.9M</td><td>20.0%</td><td>$24.9M</td><td>$2.1M</td><td style="color:#2e7d32">$22.8M</td></tr>
               <tr><td>Real Estate</td><td>$18.7M</td><td>15.0%</td><td>$18.7M</td><td>—</td><td style="color:#2e7d32">$18.7M</td></tr>
@@ -526,7 +526,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr><th>FUND / HOLDING</th><th>VALUE (USD)</th><th>CURRENCY</th><th>FX RATE</th><th>LIQUIDITY</th><th>NEXT REDEMPTION</th></tr></thead>
-            <tbody>
+            <tbody id="liquidity-tbody">
               <tr><td>US Equity Fund</td><td>$42.1M</td><td>USD</td><td>1.00</td><td><span class="badge submitted">LIQUID</span></td><td>Daily</td></tr>
               <tr><td>European Growth PE</td><td>$18.3M</td><td>EUR</td><td>1.08</td><td><span class="badge missing">ILLIQUID</span></td><td>Dec 2027</td></tr>
               <tr><td>Asia Pacific Fund</td><td>$9.7M</td><td>JPY</td><td>0.0067</td><td><span class="badge flagged">SEMI-LIQUID</span></td><td>Sep 2026</td></tr>
@@ -558,7 +558,7 @@
         <div class="table-wrap">
           <table>
             <thead><tr><th>FUND</th><th>VINTAGE</th><th>COMMITTED</th><th>CALLED</th><th>DISTRIBUTED</th><th>NET IRR</th><th>TVPI</th><th>FEES (YTD)</th></tr></thead>
-            <tbody>
+            <tbody id="vintage-tbody">
               <tr><td>Apex Growth III</td><td>2021</td><td>$12.0M</td><td>$9.6M</td><td>$2.1M</td><td style="color:#2e7d32">18.4%</td><td>1.42x</td><td>$184K</td></tr>
               <tr><td>Meridian PE II</td><td>2020</td><td>$8.5M</td><td>$8.5M</td><td>$6.2M</td><td style="color:#2e7d32">12.1%</td><td>1.31x</td><td>$127K</td></tr>
               <tr><td>Blueridge Ventures</td><td>2022</td><td>$6.0M</td><td>$3.2M</td><td>$0.4M</td><td style="color:#e74c3c">-2.4%</td><td>0.89x</td><td>$96K</td></tr>
@@ -583,7 +583,7 @@
         </div>
         <div class="table-wrap"><table>
           <thead><tr><th>ASSET CLASS</th><th>WEIGHT</th><th>RETURN</th><th>CONTRIBUTION</th><th>BENCHMARK</th><th>ACTIVE RETURN</th></tr></thead>
-          <tbody>
+          <tbody id="benchmark-tbody">
             <tr><td>Public Equity</td><td>33.8%</td><td>+11.2%</td><td style="color:#2e7d32">+3.79%</td><td>9.4%</td><td style="color:#2e7d32">+1.8%</td></tr>
             <tr><td>Private Equity</td><td>25.3%</td><td>+9.8%</td><td style="color:#2e7d32">+2.48%</td><td>8.1%</td><td style="color:#2e7d32">+1.7%</td></tr>
             <tr><td>Fixed Income</td><td>19.9%</td><td>+4.1%</td><td style="color:#2e7d32">+0.82%</td><td>3.8%</td><td style="color:#2e7d32">+0.3%</td></tr>
@@ -883,6 +883,49 @@
     showPortalSelect();
   }
 
+
+  // ══ FRESH ACCOUNT GATING ══
+  // Only this one seeded test account keeps the demo example data.
+  // Every other account sees a clean, empty state instead.
+  const DEMO_ACCOUNT_ID = 2;
+  function isDemoAccount() { return currentUser && currentUser.user_id === DEMO_ACCOUNT_ID; }
+
+  function emptyStateRow(colspan, msg) {
+    return `<tr><td colspan="${colspan}" style="text-align:center;color:#aab8d0;font-family:'Courier New',monospace;font-size:12px;padding:30px;">${msg}</td></tr>`;
+  }
+
+  function emptyChart(canvasId) {
+    const c = document.getElementById(canvasId);
+    if (!c || c.dataset.emptied) return;
+    c.dataset.emptied = '1';
+    c.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'text-align:center;color:#aab8d0;font-family:Courier New,monospace;font-size:12px;padding:40px;';
+    msg.textContent = 'No data yet — this will populate once your institution submits portfolio data.';
+    c.parentNode.appendChild(msg);
+  }
+
+  function applyFreshAccountState() {
+    if (isDemoAccount()) return; // real test account keeps its example data
+
+    const emptyTables = [
+      ['analytics-tbody', 6, 'No portfolio analytics yet.'],
+      ['exposure-tbody', 6, 'No exposure data yet.'],
+      ['liquidity-tbody', 6, 'No liquidity data yet.'],
+      ['vintage-tbody', 8, 'No private markets data yet.'],
+      ['benchmark-tbody', 6, 'No benchmark data yet.'],
+      ['pipeline-tbody', 8, 'No opportunities in your pipeline yet.'],
+    ];
+    emptyTables.forEach(([id, colspan, msg]) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = emptyStateRow(colspan, msg);
+    });
+
+    ['chart-perf-class','chart-port-value','chart-sector','chart-geo','chart-type',
+     'chart-liquidity','chart-currency','chart-jcurve','chart-cashflow',
+     'chart-benchmark','chart-attribution'].forEach(emptyChart);
+  }
+
   // ══ PORTAL NAV ══
   function showPortal(type) {
     document.getElementById('portal-select').style.display = 'none';
@@ -1050,6 +1093,7 @@
     if (currentUser.role === 'investment_manager') {
       show('director-dash');
       loadDirectorData();
+      applyFreshAccountState();
     } else {
       show('manager-dash');
       loadManagerHistory();
@@ -1277,6 +1321,7 @@
   const PALETTE8 = ["#0A2472","#4A90D9","#A8D4F5","#7C3AED","#16A34A","#DC2626","#D97706","#0891B2"];
 
   function initAnalyticsCharts() {
+    if (!isDemoAccount()) { applyFreshAccountState(); return; }
     // Performance by asset class
     const perfCtx = document.getElementById('chart-perf-class');
     if (perfCtx && !perfCtx.dataset.init) {
@@ -1346,6 +1391,7 @@
 
   // Benchmark charts
   function initBenchmarkCharts() {
+    if (!isDemoAccount()) { applyFreshAccountState(); return; }
     const bCtx = document.getElementById('chart-benchmark');
     if (bCtx && !bCtx.dataset.init) {
       bCtx.dataset.init = '1';
