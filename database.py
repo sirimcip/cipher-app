@@ -1,10 +1,15 @@
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 from passlib.context import CryptContext
 
-DATABASE_URL = "sqlite:///./cipher.db"
+# Uses the persistent Railway Volume (mounted at /data) if it exists,
+# otherwise falls back to a local file for when you run this on your
+# own computer, where there's no volume.
+DATABASE_PATH = "/data/cipher.db" if os.path.isdir("/data") else "./cipher.db"
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
