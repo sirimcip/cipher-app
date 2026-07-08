@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Boolean, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
@@ -51,10 +51,30 @@ class Submission(Base):
     submitted = Column(Boolean, default=False)
     submitted_at = Column(DateTime)
     period = Column(String, nullable=False)
+    sector = Column(String, nullable=True)
+    geography = Column(String, nullable=True)
+    liquidity_tier = Column(String, nullable=True)
+    vintage_year = Column(Integer, nullable=True)
     manager = relationship("User", back_populates="submissions")
+
+def migrate_new_columns():
+    new_columns = {
+        "sector": "TEXT",
+        "geography": "TEXT",
+        "liquidity_tier": "TEXT",
+        "vintage_year": "INTEGER",
+    }
+    with engine.connect() as conn:
+        for col_name, col_type in new_columns.items():
+            try:
+                conn.execute(text(f"ALTER TABLE submissions ADD COLUMN {col_name} {col_type}"))
+                conn.commit()
+            except Exception:
+                pass
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
+    migrate_new_columns()
 
 def get_db():
     db = SessionLocal()
