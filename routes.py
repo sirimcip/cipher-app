@@ -1,5 +1,9 @@
 import urllib.request
 import json as json_lib
+import random
+import smtplib
+import os
+from email.mime.text import MIMEText
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db, User, Submission, hash_password, verify_password
@@ -680,3 +684,51 @@ def export_excel(db: Session = Depends(get_db)):
         )
     except Exception as e:
         return {"error": str(e)}
+
+
+# ── EMAIL VERIFICATION (2FA) ──
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+
+verification_codes = {}  # {user_id: "123456"}
+
+def send_verification_email(to_email: str, code: str):
+    msg = MIMEText(f"Your CIPHER verification code is: {code}\n\nIf you didn't request this, you can ignore this email.")
+    msg["Subject"] = "Your CIPHER Verification Code"
+    msg["From"] = SMTP_USER
+    msg["To"] = to_email
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
+class SendCodeRequest(BaseModel):
+    user_id: int
+    email: str
+
+class VerifyCodeRequest(BaseModel):
+    user_id: int
+    code: str
+
+@router.post("/auth/send-code")
+def send_code(data: SendCodeRequest):
+    code = str(random.randint(100000, 999999))
+    verification_codes[data.user_id] = code
+    if not SMTP_USER or not SMTP_PASS:
+        print(f"[CIPHER 2FA - SMTP NOT CONFIGURED] Code for {data.email}: {code}")
+        return {"message": "Code generated (SMTP not configured — check Railway logs for the code)"}
+    try:
+        send_verification_email(data.email, code)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not send email: {str(e)}")
+    return {"message": "Code sent"}
+
+@router.post("/auth/verify-code")
+def verify_code(data: VerifyCodeRequest):
+    expected = verification_codes.get(data.user_id)
+    if not expected or expected != data.code:
+        raise HTTPException(status_code=401, detail="Incorrect or expired code")
+    del verification_codes[data.user_id]
+    return {"message": "Verified"}
