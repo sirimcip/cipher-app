@@ -64,7 +64,8 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
         "user_id": new_user.id,
         "name": new_user.name,
         "role": new_user.role,
-        "asset_class": new_user.asset_class
+        "asset_class": new_user.asset_class,
+        "institution_name": new_user.institution_name
     }
 
 # ── LOGIN ──
@@ -79,7 +80,8 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         "user_id": user.id,
         "name": user.name,
         "role": user.role,
-        "asset_class": user.asset_class
+        "asset_class": user.asset_class,
+        "institution_name": user.institution_name
     }
 
 # ── SUBMIT PORTFOLIO DATA ──
@@ -116,9 +118,14 @@ def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
 
 # ── GET ALL SUBMISSIONS FOR A PERIOD (DIRECTOR VIEW) ──
 @router.get("/submissions/{period}")
-def get_submissions(period: str, db: Session = Depends(get_db)):
+def get_submissions(period: str, institution: str = "", db: Session = Depends(get_db)):
+    inst = institution.strip().lower()
     all_managers = db.query(User).filter(User.role == "manager").all()
+    if inst:
+        all_managers = [m for m in all_managers if (m.institution_name or "").strip().lower() == inst]
+    manager_ids = {m.id for m in all_managers}
     submissions = db.query(Submission).filter(Submission.period == period).all()
+    submissions = [s for s in submissions if s.manager_id in manager_ids]
 
     total_managers = len(all_managers)
     submitted_count = len(submissions)
@@ -177,13 +184,16 @@ def _period_sort_key(period: str):
 
 # ── GET FULL SUBMISSION HISTORY ACROSS ALL PERIODS (FOR CHARTS) ──
 @router.get("/submissions/history/all")
-def get_all_submission_history(db: Session = Depends(get_db)):
+def get_all_submission_history(institution: str = "", db: Session = Depends(get_db)):
+    inst = institution.strip().lower()
     submissions = db.query(Submission).filter(Submission.submitted == True).all()
 
     history = []
     for s in submissions:
         manager = db.query(User).filter(User.id == s.manager_id).first()
         if not manager:
+            continue
+        if inst and (manager.institution_name or "").strip().lower() != inst:
             continue
         net_change = s.total_gained - s.total_lost
         pct_return = (net_change / s.total_invested * 100) if s.total_invested else 0
