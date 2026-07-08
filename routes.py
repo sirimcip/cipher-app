@@ -686,23 +686,32 @@ def export_excel(db: Session = Depends(get_db)):
         return {"error": str(e)}
 
 
-# ── EMAIL VERIFICATION (2FA) ──
-SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "")
-SMTP_PASS = os.environ.get("SMTP_PASS", "")
+# ── EMAIL VERIFICATION (2FA) — via Brevo HTTPS API ──
+# (SMTP is blocked on Railway's free plan, so we send over HTTPS instead)
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
+SENDER_EMAIL  = os.environ.get("SENDER_EMAIL", "noreplycipher@gmail.com")
 
 verification_codes = {}  # {user_id: "123456"}
 
 def send_verification_email(to_email: str, code: str):
-    msg = MIMEText(f"Your CIPHER verification code is: {code}\n\nIf you didn't request this, you can ignore this email.")
-    msg["Subject"] = "Your CIPHER Verification Code"
-    msg["From"] = SMTP_USER
-    msg["To"] = to_email
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.send_message(msg)
+    payload = json_lib.dumps({
+        "sender": {"email": SENDER_EMAIL, "name": "CIPHER"},
+        "to": [{"email": to_email}],
+        "subject": "Your CIPHER Verification Code",
+        "textContent": f"Your CIPHER verification code is: {code}\n\nIf you didn't request this, you can ignore this email."
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=payload,
+        headers={
+            "accept": "application/json",
+            "api-key": BREVO_API_KEY,
+            "content-type": "application/json"
+        },
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        resp.read()
 
 class SendCodeRequest(BaseModel):
     user_id: int
@@ -716,9 +725,9 @@ class VerifyCodeRequest(BaseModel):
 def send_code(data: SendCodeRequest):
     code = str(random.randint(100000, 999999))
     verification_codes[data.user_id] = code
-    if not SMTP_USER or not SMTP_PASS:
-        print(f"[CIPHER 2FA - SMTP NOT CONFIGURED] Code for {data.email}: {code}")
-        return {"message": "Code generated (SMTP not configured — check Railway logs for the code)"}
+    if not BREVO_API_KEY:
+        print(f"[CIPHER 2FA - EMAIL API NOT CONFIGURED] Code for {data.email}: {code}")
+        return {"message": "Code generated (email API not configured — check Railway logs for the code)"}
     try:
         send_verification_email(data.email, code)
     except Exception as e:
