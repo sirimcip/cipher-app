@@ -967,12 +967,29 @@
     return `<tr><td colspan="${colspan}" style="text-align:center;color:#aab8d0;font-family:'Courier New',monospace;font-size:12px;padding:30px;">${msg}</td></tr>`;
   }
 
+  function removeChartMessages(c) {
+    // Remove ALL previously-injected empty-state messages next to this
+    // canvas, regardless of how many accumulated or why -- this makes
+    // cleanup fully idempotent no matter how many times emptyChart/
+    // restoreChart get called across tab navigations.
+    let sibling = c.nextElementSibling;
+    while (sibling) {
+      const next = sibling.nextElementSibling;
+      if (sibling.classList && sibling.classList.contains('chart-empty-msg')) {
+        sibling.parentNode.removeChild(sibling);
+      }
+      sibling = next;
+    }
+  }
+
   function emptyChart(canvasId) {
     const c = document.getElementById(canvasId);
-    if (!c || c.dataset.emptied) return;
+    if (!c) return;
+    removeChartMessages(c);
     c.dataset.emptied = '1';
     c.style.display = 'none';
     const msg = document.createElement('div');
+    msg.className = 'chart-empty-msg';
     msg.style.cssText = 'text-align:center;color:#aab8d0;font-family:Courier New,monospace;font-size:12px;padding:40px;';
     msg.textContent = 'No data yet — this will populate once your institution submits portfolio data.';
     c.parentNode.appendChild(msg);
@@ -981,14 +998,9 @@
   function restoreChart(canvasId) {
     const c = document.getElementById(canvasId);
     if (!c) return;
-    if (c.dataset.emptied) {
-      c.dataset.emptied = '';
-      c.style.display = '';
-      const next = c.nextSibling;
-      if (next && next.textContent && next.textContent.indexOf('No data yet') !== -1) {
-        c.parentNode.removeChild(next);
-      }
-    }
+    removeChartMessages(c);
+    c.dataset.emptied = '';
+    c.style.display = '';
     c.dataset.init = '';
   }
 
