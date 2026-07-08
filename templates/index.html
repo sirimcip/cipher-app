@@ -173,6 +173,14 @@
     .chart-tab  { padding: 8px 16px; background: var(--soft); color: var(--navy); border: none; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'Courier New', monospace; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
     .chart-tab:hover  { background: var(--sky); color: var(--white); }
     .chart-tab.active { background: var(--navy); color: var(--white); }
+
+    .password-wrapper { position: relative; width: 100%; }
+    .password-wrapper input { width: 100%; padding-right: 40px; box-sizing: border-box; }
+    .eye-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      cursor: pointer; font-size: 16px; opacity: 0.55; user-select: none; line-height: 1;
+    }
+    .eye-toggle:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -227,7 +235,11 @@
       <div class="login-title">Investment Manager Portal</div>
       <div class="login-sub">SIGN IN TO YOUR ACCOUNT</div>
       <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="inv-email" placeholder="you@institution.com"/></div>
-      <div class="form-group"><label>PASSWORD</label><input type="password" id="inv-password" placeholder="••••••••"/></div>
+      <div class="form-group"><label>PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="inv-password" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('inv-password', this)">👁</span>
+      </div></div>
       <button class="btn-primary" onclick="doLogin('investment_manager')">SIGN IN</button>
       <div class="login-error" id="inv-error"></div>
       <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">No account? <span class="back-btn" onclick="toggleSignup('investment')">Sign up</span></div>
@@ -241,8 +253,16 @@
       <div class="form-group"><label>FULL NAME</label><input type="text" id="invsign-name" placeholder="Jane Smith"/></div>
       <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="invsign-email" placeholder="you@institution.com"/></div>
       <div class="form-group"><label>CONFIRM EMAIL</label><input type="email" id="invsign-email2" placeholder="you@institution.com"/></div>
-      <div class="form-group"><label>PASSWORD</label><input type="password" id="invsign-password" placeholder="••••••••"/></div>
-      <div class="form-group"><label>CONFIRM PASSWORD</label><input type="password" id="invsign-password2" placeholder="••••••••"/></div>
+      <div class="form-group"><label>PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="invsign-password" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('invsign-password', this)">👁</span>
+      </div></div>
+      <div class="form-group"><label>CONFIRM PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="invsign-password2" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('invsign-password2', this)">👁</span>
+      </div></div>
       <div class="form-group"><label>JOB TITLE</label><input type="text" id="invsign-title" placeholder="Investment Operations Director"/></div>
       <div class="form-group"><label>PHONE NUMBER</label><input type="tel" id="invsign-phone" placeholder="(555) 123-4567"/></div>
       <div class="form-group"><label>INSTITUTION NAME</label><input type="text" id="invsign-institution" placeholder="Children's Health System"/></div>
@@ -268,7 +288,11 @@
       <div class="login-title">Manager Portal</div>
       <div class="login-sub">SIGN IN TO YOUR ACCOUNT</div>
       <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="mgr-email" placeholder="you@institution.com"/></div>
-      <div class="form-group"><label>PASSWORD</label><input type="password" id="mgr-password" placeholder="••••••••"/></div>
+      <div class="form-group"><label>PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="mgr-password" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('mgr-password', this)">👁</span>
+      </div></div>
       <button class="btn-primary" onclick="doLogin('manager')">SIGN IN</button>
       <div class="login-error" id="mgr-error"></div>
       <div style="margin-top:18px;font-size:11px;color:#aab8d0;font-family:'Courier New',monospace;">No account? <span class="back-btn" onclick="toggleSignup('manager')">Sign up</span></div>
@@ -282,8 +306,16 @@
       <div class="form-group"><label>FULL NAME</label><input type="text" id="mgrsign-name" placeholder="John Doe"/></div>
       <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="mgrsign-email" placeholder="you@institution.com"/></div>
       <div class="form-group"><label>CONFIRM EMAIL</label><input type="email" id="mgrsign-email2" placeholder="you@institution.com"/></div>
-      <div class="form-group"><label>PASSWORD</label><input type="password" id="mgrsign-password" placeholder="••••••••"/></div>
-      <div class="form-group"><label>CONFIRM PASSWORD</label><input type="password" id="mgrsign-password2" placeholder="••••••••"/></div>
+      <div class="form-group"><label>PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="mgrsign-password" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('mgrsign-password', this)">👁</span>
+      </div></div>
+      <div class="form-group"><label>CONFIRM PASSWORD</label>
+      <div class="password-wrapper">
+        <input type="password" id="mgrsign-password2" placeholder="••••••••"/>
+        <span class="eye-toggle" onclick="togglePasswordVisibility('mgrsign-password2', this)">👁</span>
+      </div></div>
       <div class="form-group"><label>INSTITUTION NAME</label><input type="text" id="mgrsign-institution" placeholder="Children's Health System"/></div>
       <div class="form-group">
         <label>EMPLOYER IDENTIFICATION NUMBER (EIN)</label>
@@ -848,6 +880,18 @@
 </div>
 
 <script>
+  function togglePasswordVisibility(inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      iconEl.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      iconEl.textContent = '👁';
+    }
+  }
+
   // ══ SPLASH ══
   window.addEventListener('load', () => {
     show('login');
