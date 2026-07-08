@@ -209,7 +209,8 @@ def get_all_submission_history(institution: str = "", db: Session = Depends(get_
             "total_lost": s.total_lost,
             "net_change": net_change,
             "pct_return": round(pct_return, 2),
-            "cumulative_value": cumulative_value
+            "cumulative_value": cumulative_value,
+            "submitted_at": s.submitted_at.strftime("%b %d, %Y %H:%M") if s.submitted_at else "—"
         })
 
     history.sort(key=lambda h: _period_sort_key(h["period"]))
