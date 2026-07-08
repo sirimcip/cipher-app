@@ -472,7 +472,7 @@
       <!-- AI TAB -->
       <!-- PORTFOLIO ANALYTICS TAB -->
       <div id="dir-analytics" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(4,1fr)">
+        <div id="analytics-cards" class="cards" style="grid-template-columns:repeat(4,1fr)">
           <div class="card"><div class="card-label">TOTAL PORTFOLIO VALUE</div><div class="card-value">$124.6M</div><div class="card-sub">Across all asset classes</div></div>
           <div class="card success"><div class="card-label">TOTAL RETURN (YTD)</div><div class="card-value">+8.4%</div><div class="card-sub">vs 6.2% benchmark</div></div>
           <div class="card"><div class="card-label">WEIGHTED AVG RETURN</div><div class="card-value">7.1%</div><div class="card-sub">Net of fees</div></div>
@@ -504,7 +504,7 @@
 
       <!-- EXPOSURE ANALYSIS TAB -->
       <div id="dir-exposure" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(3,1fr)">
+        <div id="exposure-cards" class="cards" style="grid-template-columns:repeat(3,1fr)">
           <div class="card"><div class="card-label">SECTORS TRACKED</div><div class="card-value">8</div><div class="card-sub">Across all holdings</div></div>
           <div class="card"><div class="card-label">GEOGRAPHIES</div><div class="card-value">12</div><div class="card-sub">Countries represented</div></div>
           <div class="card danger"><div class="card-label">CONCENTRATION RISK</div><div class="card-value">High</div><div class="card-sub">Healthcare >35% of portfolio</div></div>
@@ -539,7 +539,7 @@
 
       <!-- LIQUIDITY TAB -->
       <div id="dir-liquidity" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(4,1fr)">
+        <div id="liquidity-cards" class="cards" style="grid-template-columns:repeat(4,1fr)">
           <div class="card success"><div class="card-label">AVAILABLE LIQUIDITY</div><div class="card-value">$18.4M</div><div class="card-sub">Immediately accessible</div></div>
           <div class="card"><div class="card-label">30-DAY LIQUIDITY</div><div class="card-value">$31.2M</div><div class="card-sub">Redeemable within 30 days</div></div>
           <div class="card danger"><div class="card-label">ILLIQUID ASSETS</div><div class="card-value">$74.8M</div><div class="card-sub">Lock-up > 1 year</div></div>
@@ -571,7 +571,7 @@
 
       <!-- PRIVATE MARKETS TAB -->
       <div id="dir-private" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(4,1fr)">
+        <div id="private-cards" class="cards" style="grid-template-columns:repeat(4,1fr)">
           <div class="card"><div class="card-label">TOTAL PE COMMITMENTS</div><div class="card-value">$48.2M</div><div class="card-sub">Across 6 funds</div></div>
           <div class="card success"><div class="card-label">NET IRR (COMPOSITE)</div><div class="card-value">14.2%</div><div class="card-sub">Since inception</div></div>
           <div class="card"><div class="card-label">TOTAL FEES (YTD)</div><div class="card-value">$1.24M</div><div class="card-sub">Mgmt + carried interest</div></div>
@@ -603,7 +603,7 @@
 
 
       <div id="dir-benchmark" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(4,1fr)">
+        <div id="benchmark-cards" class="cards" style="grid-template-columns:repeat(4,1fr)">
           <div class="card success"><div class="card-label">PORTFOLIO RETURN (YTD)</div><div class="card-value">+8.4%</div><div class="card-sub">Net of fees</div></div>
           <div class="card"><div class="card-label">S&P 500 (YTD)</div><div class="card-value">+6.2%</div><div class="card-sub">Benchmark</div></div>
           <div class="card"><div class="card-label">MSCI WORLD (YTD)</div><div class="card-value">+5.8%</div><div class="card-sub">Benchmark</div></div>
@@ -645,7 +645,7 @@
       </div>
 
       <div id="dir-pipeline" style="display:none">
-        <div class="cards" style="grid-template-columns:repeat(4,1fr)">
+        <div id="pipeline-cards" class="cards" style="grid-template-columns:repeat(4,1fr)">
           <div class="card"><div class="card-label">TOTAL OPPORTUNITIES</div><div class="card-value">12</div><div class="card-sub">In active pipeline</div></div>
           <div class="card"><div class="card-label">UNDER REVIEW</div><div class="card-value">5</div><div class="card-sub">Pending IC decision</div></div>
           <div class="card success"><div class="card-label">APPROVED (YTD)</div><div class="card-value">3</div><div class="card-sub">$24.5M committed</div></div>
@@ -949,6 +949,100 @@
     c.parentNode.appendChild(msg);
   }
 
+  function restoreChart(canvasId) {
+    const c = document.getElementById(canvasId);
+    if (!c) return;
+    if (c.dataset.emptied) {
+      c.dataset.emptied = '';
+      c.style.display = '';
+      const next = c.nextSibling;
+      if (next && next.textContent && next.textContent.indexOf('No data yet') !== -1) {
+        c.parentNode.removeChild(next);
+      }
+    }
+    c.dataset.init = '';
+  }
+
+  let realPerfChart = null;
+  let realPortValueChart = null;
+
+  function renderRealPortfolioAnalytics() {
+    if (!fullHistory || !fullHistory.length) return; // genuinely nothing yet — leave empty state
+
+    const periods = getPeriods(fullHistory);
+    const latestPeriod = periods[periods.length - 1];
+    const latestRows = fullHistory.filter(h => h.period === latestPeriod);
+
+    const totalValue = latestRows.reduce((s, r) => s + r.cumulative_value, 0);
+    const totalInvested = latestRows.reduce((s, r) => s + r.total_invested, 0);
+    const totalNetChange = latestRows.reduce((s, r) => s + r.net_change, 0);
+    const totalReturnPct = totalInvested ? (totalNetChange / totalInvested * 100) : 0;
+
+    const classes = [...new Set(latestRows.map(r => r.asset_class).filter(Boolean))];
+    const byClass = classes.map(ac => {
+      const rows = latestRows.filter(r => r.asset_class === ac);
+      const value = rows.reduce((s, r) => s + r.cumulative_value, 0);
+      const invested = rows.reduce((s, r) => s + r.total_invested, 0);
+      const netChange = rows.reduce((s, r) => s + r.net_change, 0);
+      const returnPct = invested ? (netChange / invested * 100) : 0;
+      const weightPct = totalValue ? (value / totalValue * 100) : 0;
+      return { ac, value, returnPct, weightPct };
+    });
+
+    const cardsEl = document.getElementById('analytics-cards');
+    if (cardsEl) {
+      cardsEl.innerHTML = `
+        <div class="card"><div class="card-label">TOTAL PORTFOLIO VALUE</div><div class="card-value">$${(totalValue/1000000).toFixed(1)}M</div><div class="card-sub">Across all asset classes</div></div>
+        <div class="card ${totalReturnPct >= 0 ? 'success' : 'danger'}"><div class="card-label">TOTAL RETURN</div><div class="card-value">${totalReturnPct >= 0 ? '+' : ''}${totalReturnPct.toFixed(1)}%</div><div class="card-sub">For ${latestPeriod}</div></div>
+        <div class="card"><div class="card-label">WEIGHTED AVG RETURN</div><div class="card-value">${totalReturnPct.toFixed(1)}%</div><div class="card-sub">Net of fees</div></div>
+        <div class="card"><div class="card-label">ASSET CLASSES</div><div class="card-value">${classes.length}</div><div class="card-sub">Reporting this period</div></div>
+      `;
+    }
+
+    const tbodyEl = document.getElementById('analytics-tbody');
+    if (tbodyEl) {
+      tbodyEl.innerHTML = byClass.map(c => `
+        <tr>
+          <td>${c.ac}</td>
+          <td>$${(c.value/1000000).toFixed(2)}M</td>
+          <td>${c.weightPct.toFixed(1)}%</td>
+          <td style="color:${c.returnPct >= 0 ? '#2e7d32' : '#e74c3c'}">${c.returnPct >= 0 ? '+' : ''}${c.returnPct.toFixed(1)}%</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+      `).join('');
+    }
+
+    restoreChart('chart-perf-class');
+    const perfCtx = document.getElementById('chart-perf-class');
+    if (perfCtx) {
+      if (realPerfChart) realPerfChart.destroy();
+      realPerfChart = new Chart(perfCtx, {
+        type: 'bar',
+        data: { labels: byClass.map(c => c.ac), datasets: [{ label: 'Return %', data: byClass.map(c => c.returnPct), backgroundColor: byClass.map(c => c.returnPct >= 0 ? '#2e7d32' : '#e74c3c') }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'Return (%)' } } } }
+      });
+    }
+
+    restoreChart('chart-port-value');
+    const pvCtx = document.getElementById('chart-port-value');
+    if (pvCtx) {
+      const valueByPeriod = periods.map(p => fullHistory.filter(h => h.period === p).reduce((s, r) => s + r.cumulative_value, 0));
+      if (realPortValueChart) realPortValueChart.destroy();
+      realPortValueChart = new Chart(pvCtx, {
+        type: 'line',
+        data: { labels: periods, datasets: [{ label: 'Portfolio Value ($)', data: valueByPeriod, borderColor: '#0A2472', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0.3, fill: true }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'Value ($)' } } } }
+      });
+    }
+  }
+
+  function refreshDirectorAnalytics() {
+    if (isDemoAccount()) return; // demo account keeps its original static content
+    applyFreshAccountState();       // baseline: empty everything
+    renderRealPortfolioAnalytics(); // override Portfolio Analytics with real data, if any
+  }
+
   function applyFreshAccountState() {
     if (isDemoAccount()) return; // real test account keeps its example data
 
@@ -968,6 +1062,13 @@
     ['chart-perf-class','chart-port-value','chart-sector','chart-geo','chart-type',
      'chart-liquidity','chart-currency','chart-jcurve','chart-cashflow',
      'chart-benchmark','chart-attribution'].forEach(emptyChart);
+
+    const emptyCardRows = ['analytics-cards', 'exposure-cards', 'liquidity-cards',
+                            'private-cards', 'benchmark-cards', 'pipeline-cards'];
+    emptyCardRows.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:#aab8d0;font-family:\'Courier New\',monospace;padding:30px;">No data yet — this will populate once your institution submits portfolio data.</div>';
+    });
   }
 
   // ══ PORTAL NAV ══
@@ -1151,7 +1252,6 @@
     if (currentUser.role === 'investment_manager') {
       show('director-dash');
       loadDirectorData();
-      applyFreshAccountState();
     } else {
       show('manager-dash');
       loadManagerHistory();
@@ -1275,6 +1375,7 @@
       await fetchFullHistory();
       renderDirectorChart();
       renderAllSubmissionsTab();
+      refreshDirectorAnalytics();
     } catch (e) { console.error("Could not load director data", e); }
   }
 
@@ -1403,7 +1504,7 @@
   const PALETTE8 = ["#0A2472","#4A90D9","#A8D4F5","#7C3AED","#16A34A","#DC2626","#D97706","#0891B2"];
 
   function initAnalyticsCharts() {
-    if (!isDemoAccount()) { applyFreshAccountState(); return; }
+    if (!isDemoAccount()) { refreshDirectorAnalytics(); return; }
     // Performance by asset class
     const perfCtx = document.getElementById('chart-perf-class');
     if (perfCtx && !perfCtx.dataset.init) {
