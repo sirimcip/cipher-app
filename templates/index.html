@@ -511,21 +511,21 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px;">
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">BY SECTOR</div>
+            <div class="section-title" id="exposure-chart1-title" style="margin-bottom:16px;">BY SECTOR</div>
             <canvas id="chart-sector" height="240"></canvas>
           </div>
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">BY GEOGRAPHY</div>
+            <div class="section-title" id="exposure-chart2-title" style="margin-bottom:16px;">BY GEOGRAPHY</div>
             <canvas id="chart-geo" height="240"></canvas>
           </div>
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">BY ASSET TYPE</div>
+            <div class="section-title" id="exposure-chart3-title" style="margin-bottom:16px;">BY ASSET TYPE</div>
             <canvas id="chart-type" height="240"></canvas>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>SECTOR</th><th>EXPOSURE</th><th>% OF PORTFOLIO</th><th>LONG</th><th>SHORT</th><th>NET</th></tr></thead>
+            <thead id="exposure-thead"><tr><th>SECTOR</th><th>EXPOSURE</th><th>% OF PORTFOLIO</th><th>LONG</th><th>SHORT</th><th>NET</th></tr></thead>
             <tbody id="exposure-tbody">
               <tr><td>Healthcare</td><td>$43.6M</td><td>35.0%</td><td>$43.6M</td><td>—</td><td style="color:#2e7d32">$43.6M</td></tr>
               <tr><td>Technology</td><td>$24.9M</td><td>20.0%</td><td>$24.9M</td><td>$2.1M</td><td style="color:#2e7d32">$22.8M</td></tr>
@@ -547,17 +547,17 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">LIQUIDITY PROFILE</div>
+            <div class="section-title" id="liquidity-chart1-title" style="margin-bottom:16px;">LIQUIDITY PROFILE</div>
             <canvas id="chart-liquidity" height="220"></canvas>
           </div>
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">CURRENCY EXPOSURE (BASE: USD)</div>
+            <div class="section-title" id="liquidity-chart2-title" style="margin-bottom:16px;">CURRENCY EXPOSURE (BASE: USD)</div>
             <canvas id="chart-currency" height="220"></canvas>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>FUND / HOLDING</th><th>VALUE (USD)</th><th>CURRENCY</th><th>FX RATE</th><th>LIQUIDITY</th><th>NEXT REDEMPTION</th></tr></thead>
+            <thead id="liquidity-thead"><tr><th>FUND / HOLDING</th><th>VALUE (USD)</th><th>CURRENCY</th><th>FX RATE</th><th>LIQUIDITY</th><th>NEXT REDEMPTION</th></tr></thead>
             <tbody id="liquidity-tbody">
               <tr><td>US Equity Fund</td><td>$42.1M</td><td>USD</td><td>1.00</td><td><span class="badge submitted">LIQUID</span></td><td>Daily</td></tr>
               <tr><td>European Growth PE</td><td>$18.3M</td><td>EUR</td><td>1.08</td><td><span class="badge missing">ILLIQUID</span></td><td>Dec 2027</td></tr>
@@ -579,17 +579,17 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">J-CURVE ANALYSIS</div>
+            <div class="section-title" id="private-chart1-title" style="margin-bottom:16px;">J-CURVE ANALYSIS</div>
             <canvas id="chart-jcurve" height="220"></canvas>
           </div>
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
-            <div class="section-title" style="margin-bottom:16px;">CASH FLOW FORECAST</div>
+            <div class="section-title" id="private-chart2-title" style="margin-bottom:16px;">CASH FLOW FORECAST</div>
             <canvas id="chart-cashflow" height="220"></canvas>
           </div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>FUND</th><th>VINTAGE</th><th>COMMITTED</th><th>CALLED</th><th>DISTRIBUTED</th><th>NET IRR</th><th>TVPI</th><th>FEES (YTD)</th></tr></thead>
+            <thead id="private-thead"><tr><th>FUND</th><th>VINTAGE</th><th>COMMITTED</th><th>CALLED</th><th>DISTRIBUTED</th><th>NET IRR</th><th>TVPI</th><th>FEES (YTD)</th></tr></thead>
             <tbody id="vintage-tbody">
               <tr><td>Apex Growth III</td><td>2021</td><td>$12.0M</td><td>$9.6M</td><td>$2.1M</td><td style="color:#2e7d32">18.4%</td><td>1.42x</td><td>$184K</td></tr>
               <tr><td>Meridian PE II</td><td>2020</td><td>$8.5M</td><td>$8.5M</td><td>$6.2M</td><td style="color:#2e7d32">12.1%</td><td>1.31x</td><td>$127K</td></tr>
@@ -840,6 +840,35 @@
             <div class="input-group"><label>TOTAL GAINED ($)</label><input type="number" placeholder="0.00" id="m-gained"/></div>
             <div class="input-group"><label>TOTAL LOST ($)</label><input type="number" placeholder="0.00" id="m-lost"/></div>
           </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>SECTOR (OPTIONAL)</label>
+              <select id="m-sector">
+                <option value="">— Not specified —</option>
+                <option>Healthcare</option><option>Technology</option><option>Real Estate</option>
+                <option>Infrastructure</option><option>Financials</option><option>Energy</option>
+                <option>Consumer</option><option>Industrials</option><option>Other</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>GEOGRAPHY (OPTIONAL)</label>
+              <select id="m-geography">
+                <option value="">— Not specified —</option>
+                <option>North America</option><option>Europe</option><option>Asia Pacific</option>
+                <option>Latin America</option><option>Middle East</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label>LIQUIDITY TIER (OPTIONAL)</label>
+              <select id="m-liquidity">
+                <option value="">— Not specified —</option>
+                <option>Liquid</option><option>Semi-Liquid</option><option>Illiquid</option>
+              </select>
+            </div>
+            <div class="input-group"><label>VINTAGE YEAR (OPTIONAL)</label><input type="number" placeholder="e.g. 2021" id="m-vintage" min="1990" max="2100"/></div>
+          </div>
           <div class="input-group" style="margin-bottom:24px">
             <label>NOTES (OPTIONAL)</label>
             <textarea id="m-notes" placeholder="Any additional context for this period..."></textarea>
@@ -1037,10 +1066,236 @@
     }
   }
 
+  function computeGroupedBreakdown(fieldName) {
+    if (!fullHistory || !fullHistory.length) return null;
+    const periods = getPeriods(fullHistory);
+    const latestPeriod = periods[periods.length - 1];
+    const latestRows = fullHistory.filter(h => h.period === latestPeriod);
+    const totalValue = latestRows.reduce((s, r) => s + r.cumulative_value, 0);
+    const groups = [...new Set(latestRows.map(r => r[fieldName] || 'Not Specified'))];
+    const byGroup = groups.map(g => {
+      const rows = latestRows.filter(r => (r[fieldName] || 'Not Specified') === g);
+      const value = rows.reduce((s, r) => s + r.cumulative_value, 0);
+      const invested = rows.reduce((s, r) => s + r.total_invested, 0);
+      const netChange = rows.reduce((s, r) => s + r.net_change, 0);
+      const returnPct = invested ? (netChange / invested * 100) : 0;
+      const weightPct = totalValue ? (value / totalValue * 100) : 0;
+      return { label: g, value, returnPct, weightPct };
+    });
+    byGroup.sort((a, b) => b.weightPct - a.weightPct);
+    return { periods, latestPeriod, totalValue, groups, byGroup };
+  }
+
+  function computeLatestBreakdown() {
+    if (!fullHistory || !fullHistory.length) return null;
+    const periods = getPeriods(fullHistory);
+    const latestPeriod = periods[periods.length - 1];
+    const latestRows = fullHistory.filter(h => h.period === latestPeriod);
+    const totalValue = latestRows.reduce((s, r) => s + r.cumulative_value, 0);
+    const totalInvested = latestRows.reduce((s, r) => s + r.total_invested, 0);
+    const totalNetChange = latestRows.reduce((s, r) => s + r.net_change, 0);
+    const totalReturnPct = totalInvested ? (totalNetChange / totalInvested * 100) : 0;
+    const classes = [...new Set(latestRows.map(r => r.asset_class).filter(Boolean))];
+    const byClass = classes.map(ac => {
+      const rows = latestRows.filter(r => r.asset_class === ac);
+      const value = rows.reduce((s, r) => s + r.cumulative_value, 0);
+      const invested = rows.reduce((s, r) => s + r.total_invested, 0);
+      const netChange = rows.reduce((s, r) => s + r.net_change, 0);
+      const returnPct = invested ? (netChange / invested * 100) : 0;
+      const weightPct = totalValue ? (value / totalValue * 100) : 0;
+      return { ac, value, returnPct, weightPct };
+    });
+    byClass.sort((a, b) => b.weightPct - a.weightPct);
+    return { periods, latestPeriod, totalValue, totalReturnPct, classes, byClass };
+  }
+
+  let exposureDoughnut = null, exposureBar = null, liquidityBar = null, liquidityDoughnut = null,
+      privateLine = null, privateBar = null, benchmarkBar = null, benchmarkAttrBar = null;
+
+  function renderRealExposure() {
+    const d = computeLatestBreakdown();
+    if (!d) return;
+    const bySector = computeGroupedBreakdown('sector');
+    const byGeo = computeGroupedBreakdown('geography');
+    const top = bySector.byGroup[0];
+    const concentration = !top ? 'Low' : top.weightPct > 50 ? 'High' : top.weightPct > 30 ? 'Moderate' : 'Low';
+    const concClass = concentration === 'High' ? 'danger' : concentration === 'Moderate' ? '' : 'success';
+
+    const cardsEl = document.getElementById('exposure-cards');
+    if (cardsEl) cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">SECTORS REPORTED</div><div class="card-value">${bySector.groups.length}</div><div class="card-sub">Across all holdings</div></div>
+      <div class="card"><div class="card-label">GEOGRAPHIES REPORTED</div><div class="card-value">${byGeo.groups.length}</div><div class="card-sub">Countries/regions represented</div></div>
+      <div class="card ${concClass}"><div class="card-label">CONCENTRATION RISK</div><div class="card-value">${concentration}</div><div class="card-sub">${top ? top.label + ' is ' + top.weightPct.toFixed(1) + '% of portfolio' : ''}</div></div>
+    `;
+
+    const t1 = document.getElementById('exposure-chart1-title'); if (t1) t1.textContent = 'BY SECTOR';
+    const t2 = document.getElementById('exposure-chart2-title'); if (t2) t2.textContent = 'BY GEOGRAPHY';
+    const t3 = document.getElementById('exposure-chart3-title'); if (t3) t3.textContent = 'BY ASSET TYPE';
+    const thead = document.getElementById('exposure-thead');
+    if (thead) thead.innerHTML = '<tr><th>SECTOR</th><th>VALUE</th><th>% OF PORTFOLIO</th><th>RETURN (YTD)</th></tr>';
+
+    const tbody = document.getElementById('exposure-tbody');
+    if (tbody) tbody.innerHTML = bySector.byGroup.map(c => `
+      <tr><td>${c.label}</td><td>$${(c.value/1000000).toFixed(2)}M</td><td>${c.weightPct.toFixed(1)}%</td>
+      <td style="color:${c.returnPct >= 0 ? '#2e7d32' : '#e74c3c'}">${c.returnPct >= 0 ? '+' : ''}${c.returnPct.toFixed(1)}%</td></tr>
+    `).join('');
+
+    restoreChart('chart-sector');
+    const secCtx = document.getElementById('chart-sector');
+    if (secCtx) {
+      if (exposureBar) exposureBar.destroy();
+      exposureBar = new Chart(secCtx, { type: 'doughnut', data: { labels: bySector.byGroup.map(c => c.label), datasets: [{ data: bySector.byGroup.map(c => c.weightPct), backgroundColor: PALETTE8 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    restoreChart('chart-geo');
+    const geoCtx = document.getElementById('chart-geo');
+    if (geoCtx) {
+      if (exposureDoughnut) exposureDoughnut.destroy();
+      exposureDoughnut = new Chart(geoCtx, { type: 'doughnut', data: { labels: byGeo.byGroup.map(c => c.label), datasets: [{ data: byGeo.byGroup.map(c => c.weightPct), backgroundColor: PALETTE8 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+    }
+
+    restoreChart('chart-type');
+    const typeCtx = document.getElementById('chart-type');
+    if (typeCtx) {
+      if (window.exposureTypeChart) window.exposureTypeChart.destroy();
+      window.exposureTypeChart = new Chart(typeCtx, { type: 'doughnut', data: { labels: d.byClass.map(c => c.ac), datasets: [{ data: d.byClass.map(c => c.weightPct), backgroundColor: PALETTE8 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+    }
+  }
+
+  function renderRealLiquidity() {
+    const d = computeLatestBreakdown();
+    if (!d) return;
+    const byTier = computeGroupedBreakdown('liquidity_tier');
+    const liquid = byTier.byGroup.find(g => g.label === 'Liquid');
+    const illiquid = byTier.byGroup.find(g => g.label === 'Illiquid');
+    const semiLiquid = byTier.byGroup.find(g => g.label === 'Semi-Liquid');
+
+    const cardsEl = document.getElementById('liquidity-cards');
+    if (cardsEl) cardsEl.innerHTML = `
+      <div class="card success"><div class="card-label">LIQUID</div><div class="card-value">$${liquid ? (liquid.value/1000000).toFixed(1) : '0.0'}M</div><div class="card-sub">Immediately accessible</div></div>
+      <div class="card"><div class="card-label">SEMI-LIQUID</div><div class="card-value">$${semiLiquid ? (semiLiquid.value/1000000).toFixed(1) : '0.0'}M</div><div class="card-sub">Redeemable with notice</div></div>
+      <div class="card danger"><div class="card-label">ILLIQUID</div><div class="card-value">$${illiquid ? (illiquid.value/1000000).toFixed(1) : '0.0'}M</div><div class="card-sub">Lock-up assets</div></div>
+      <div class="card"><div class="card-label">TOTAL VALUE</div><div class="card-value">$${(d.totalValue/1000000).toFixed(1)}M</div><div class="card-sub">For ${d.latestPeriod}</div></div>
+    `;
+
+    const t1 = document.getElementById('liquidity-chart1-title'); if (t1) t1.textContent = 'LIQUIDITY PROFILE';
+    const t2 = document.getElementById('liquidity-chart2-title'); if (t2) t2.textContent = 'PORTFOLIO WEIGHT BY ASSET CLASS';
+    const thead = document.getElementById('liquidity-thead');
+    if (thead) thead.innerHTML = '<tr><th>LIQUIDITY TIER</th><th>VALUE</th><th>% OF PORTFOLIO</th><th>RETURN (YTD)</th></tr>';
+
+    const tbody = document.getElementById('liquidity-tbody');
+    if (tbody) tbody.innerHTML = byTier.byGroup.map(c => `
+      <tr><td>${c.label}</td><td>$${(c.value/1000000).toFixed(2)}M</td><td>${c.weightPct.toFixed(1)}%</td>
+      <td style="color:${c.returnPct >= 0 ? '#2e7d32' : '#e74c3c'}">${c.returnPct >= 0 ? '+' : ''}${c.returnPct.toFixed(1)}%</td></tr>
+    `).join('');
+
+    restoreChart('chart-liquidity');
+    const liqCtx = document.getElementById('chart-liquidity');
+    if (liqCtx) {
+      if (liquidityBar) liquidityBar.destroy();
+      liquidityBar = new Chart(liqCtx, { type: 'bar', data: { labels: byTier.byGroup.map(c => c.label), datasets: [{ label: 'Value ($)', data: byTier.byGroup.map(c => c.value), backgroundColor: '#4A90D9' }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }
+
+    restoreChart('chart-currency');
+    const curCtx = document.getElementById('chart-currency');
+    if (curCtx) {
+      if (liquidityDoughnut) liquidityDoughnut.destroy();
+      liquidityDoughnut = new Chart(curCtx, { type: 'doughnut', data: { labels: d.byClass.map(c => c.ac), datasets: [{ data: d.byClass.map(c => c.weightPct), backgroundColor: PALETTE8 }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } });
+    }
+  }
+
+  function renderRealPrivateMarkets() {
+    const d = computeLatestBreakdown();
+    if (!d) return;
+    const byVintage = computeGroupedBreakdown('vintage_year');
+    const best = byVintage.byGroup.reduce((a, b) => (!a || b.returnPct > a.returnPct) ? b : a, null);
+
+    const cardsEl = document.getElementById('private-cards');
+    if (cardsEl) cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">TOTAL VALUE</div><div class="card-value">$${(d.totalValue/1000000).toFixed(1)}M</div><div class="card-sub">For ${d.latestPeriod}</div></div>
+      <div class="card success"><div class="card-label">BEST VINTAGE</div><div class="card-value" style="font-size:20px">${best ? best.label : '—'}</div><div class="card-sub">${best ? (best.returnPct>=0?'+':'')+best.returnPct.toFixed(1)+'%' : ''}</div></div>
+      <div class="card"><div class="card-label">VINTAGES REPORTED</div><div class="card-value">${byVintage.groups.length}</div><div class="card-sub">Reporting this period</div></div>
+      <div class="card"><div class="card-label">REPORTING PERIOD</div><div class="card-value" style="font-size:20px">${d.latestPeriod}</div><div class="card-sub">Latest submitted quarter</div></div>
+    `;
+
+    const t1 = document.getElementById('private-chart1-title'); if (t1) t1.textContent = 'PORTFOLIO VALUE OVER TIME';
+    const t2 = document.getElementById('private-chart2-title'); if (t2) t2.textContent = 'RETURN BY VINTAGE YEAR';
+    const thead = document.getElementById('private-thead');
+    if (thead) thead.innerHTML = '<tr><th>VINTAGE YEAR</th><th>VALUE</th><th>% OF PORTFOLIO</th><th>RETURN (YTD)</th></tr>';
+
+    const tbody = document.getElementById('vintage-tbody');
+    if (tbody) tbody.innerHTML = byVintage.byGroup.map(c => `
+      <tr><td>${c.label}</td><td>$${(c.value/1000000).toFixed(2)}M</td><td>${c.weightPct.toFixed(1)}%</td>
+      <td style="color:${c.returnPct >= 0 ? '#2e7d32' : '#e74c3c'}">${c.returnPct >= 0 ? '+' : ''}${c.returnPct.toFixed(1)}%</td></tr>
+    `).join('');
+
+    restoreChart('chart-jcurve');
+    const jCtx = document.getElementById('chart-jcurve');
+    if (jCtx) {
+      const valueByPeriod = d.periods.map(p => fullHistory.filter(h => h.period === p).reduce((s, r) => s + r.cumulative_value, 0));
+      if (privateLine) privateLine.destroy();
+      privateLine = new Chart(jCtx, { type: 'line', data: { labels: d.periods, datasets: [{ label: 'Value ($)', data: valueByPeriod, borderColor: '#0A2472', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0, fill: true, pointRadius: 5 }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }
+
+    restoreChart('chart-cashflow');
+    const cfCtx = document.getElementById('chart-cashflow');
+    if (cfCtx) {
+      if (privateBar) privateBar.destroy();
+      privateBar = new Chart(cfCtx, { type: 'bar', data: { labels: byVintage.byGroup.map(c => c.label), datasets: [{ label: 'Return %', data: byVintage.byGroup.map(c => c.returnPct), backgroundColor: byVintage.byGroup.map(c => c.returnPct >= 0 ? '#2e7d32' : '#e74c3c') }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }
+  }
+
+  async function renderRealBenchmarks() {
+    const d = computeLatestBreakdown();
+    if (!d) return;
+
+    let spyChange = null, qqqChange = null;
+    try { const spy = await fetchQuote('SPY'); if (spy) spyChange = parseFloat(spy['10. change percent']); } catch (e) {}
+    try { const qqq = await fetchQuote('QQQ'); if (qqq) qqqChange = parseFloat(qqq['10. change percent']); } catch (e) {}
+
+    const cardsEl = document.getElementById('benchmark-cards');
+    if (cardsEl) cardsEl.innerHTML = `
+      <div class="card ${d.totalReturnPct >= 0 ? 'success' : 'danger'}"><div class="card-label">PORTFOLIO RETURN</div><div class="card-value">${d.totalReturnPct >= 0 ? '+' : ''}${d.totalReturnPct.toFixed(1)}%</div><div class="card-sub">For ${d.latestPeriod}</div></div>
+      <div class="card"><div class="card-label">S&P 500 (TODAY)</div><div class="card-value">${spyChange !== null ? (spyChange>=0?'+':'')+spyChange.toFixed(2)+'%' : '—'}</div><div class="card-sub">Live daily change</div></div>
+      <div class="card"><div class="card-label">NASDAQ (TODAY)</div><div class="card-value">${qqqChange !== null ? (qqqChange>=0?'+':'')+qqqChange.toFixed(2)+'%' : '—'}</div><div class="card-sub">Live daily change</div></div>
+      <div class="card"><div class="card-label">ASSET CLASSES</div><div class="card-value">${d.classes.length}</div><div class="card-sub">Reporting this period</div></div>
+    `;
+
+    const tbody = document.getElementById('benchmark-tbody');
+    if (tbody) tbody.innerHTML = d.byClass.map(c => `
+      <tr><td>${c.ac}</td><td>${c.weightPct.toFixed(1)}%</td>
+      <td style="color:${c.returnPct >= 0 ? '#2e7d32' : '#e74c3c'}">${c.returnPct >= 0 ? '+' : ''}${c.returnPct.toFixed(1)}%</td>
+      <td>—</td><td>—</td><td>—</td></tr>
+    `).join('');
+
+    restoreChart('chart-benchmark');
+    const bCtx = document.getElementById('chart-benchmark');
+    if (bCtx) {
+      const labels = ['Portfolio (' + d.latestPeriod + ')'];
+      const values = [d.totalReturnPct];
+      const colors = ['#0A2472'];
+      if (spyChange !== null) { labels.push('S&P 500 (Today)'); values.push(spyChange); colors.push('#4A90D9'); }
+      if (qqqChange !== null) { labels.push('Nasdaq (Today)'); values.push(qqqChange); colors.push('#A8D4F5'); }
+      if (benchmarkBar) benchmarkBar.destroy();
+      benchmarkBar = new Chart(bCtx, { type: 'bar', data: { labels, datasets: [{ label: 'Return %', data: values, backgroundColor: colors }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }
+
+    restoreChart('chart-attribution');
+    const aCtx = document.getElementById('chart-attribution');
+    if (aCtx) {
+      if (benchmarkAttrBar) benchmarkAttrBar.destroy();
+      benchmarkAttrBar = new Chart(aCtx, { type: 'bar', data: { labels: d.byClass.map(c => c.ac), datasets: [{ label: 'Return %', data: d.byClass.map(c => c.returnPct), backgroundColor: d.byClass.map(c => c.returnPct >= 0 ? '#2e7d32' : '#e74c3c') }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+    }
+  }
+
   function refreshDirectorAnalytics() {
     if (isDemoAccount()) return; // demo account keeps its original static content
     applyFreshAccountState();       // baseline: empty everything
     renderRealPortfolioAnalytics(); // override Portfolio Analytics with real data, if any
+    renderRealExposure();
+    renderRealLiquidity();
+    renderRealPrivateMarkets();
+    renderRealBenchmarks();
   }
 
   function applyFreshAccountState() {
@@ -1289,6 +1544,10 @@
     const lost     = document.getElementById('m-lost').value;
     const period   = document.getElementById('m-period').value;
     const notes    = document.getElementById('m-notes').value;
+    const sector    = document.getElementById('m-sector').value;
+    const geography = document.getElementById('m-geography').value;
+    const liquidity = document.getElementById('m-liquidity').value;
+    const vintage   = document.getElementById('m-vintage').value;
     if (!invested || !gained || !lost || !currentUser) return;
 
     try {
@@ -1300,7 +1559,11 @@
           total_gained: parseFloat(gained),
           total_lost: parseFloat(lost),
           notes: notes,
-          period: period
+          period: period,
+          sector: sector || null,
+          geography: geography || null,
+          liquidity_tier: liquidity || null,
+          vintage_year: vintage ? parseInt(vintage) : null
         })
       });
       if (res.ok) {
@@ -1574,7 +1837,7 @@
 
   // Benchmark charts
   function initBenchmarkCharts() {
-    if (!isDemoAccount()) { applyFreshAccountState(); return; }
+    if (!isDemoAccount()) { refreshDirectorAnalytics(); return; }
     const bCtx = document.getElementById('chart-benchmark');
     if (bCtx && !bCtx.dataset.init) {
       bCtx.dataset.init = '1';
