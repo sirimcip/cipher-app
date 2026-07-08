@@ -685,13 +685,11 @@
         <div class="section-header">
           <div class="section-title">DUE DILIGENCE CHECKLISTS</div>
           <select id="dd-select" onchange="loadDDChecklist(this.value)" style="padding:8px 14px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;color:#0A2472;">
-            <option value="">Select Opportunity</option>
-            <option value="apex">Apex Growth Fund IV</option>
-            <option value="meridian">Meridian RE Fund III</option>
+            <option value="">Select Manager</option>
           </select>
         </div>
         <div id="dd-content" style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 4px rgba(10,36,114,0.08);">
-          <div style="text-align:center;color:#aab8d0;font-family:'Courier New',monospace;font-size:12px;padding:40px;">Select an opportunity above to load its due diligence checklist.</div>
+          <div style="text-align:center;color:#aab8d0;font-family:'Courier New',monospace;font-size:12px;padding:40px;">Select a manager above to load their due diligence checklist.</div>
         </div>
       </div>
 
@@ -1308,6 +1306,7 @@
     renderRealLiquidity();
     renderRealPrivateMarkets();
     renderRealBenchmarks();
+    populateDDDropdown();
   }
 
   function applyFreshAccountState() {
@@ -2001,29 +2000,65 @@
   }
 
   // Due Diligence
-  const ddChecklists = {
-    apex: { name:'Apex Growth Fund IV', items:[
+  function genericChecklistTemplate() {
+    return [
       { section:'Legal & Compliance', checks:['Fund formation documents reviewed','LP agreement reviewed','Regulatory filings verified','No pending litigation confirmed'] },
       { section:'Investment Strategy', checks:['Investment thesis documented','Target sectors identified','Historical deal flow reviewed','Co-investment rights confirmed'] },
       { section:'Team & Operations', checks:['GP team backgrounds verified','Key person provisions reviewed','Operational infrastructure assessed','Reference checks completed'] },
       { section:'Financial', checks:['Audited financials reviewed','Fee structure documented (2/20)','Waterfall mechanics confirmed','Capital call schedule reviewed'] },
-    ]},
-    meridian: { name:'Meridian RE Fund III', items:[
-      { section:'Legal & Compliance', checks:['Fund structure verified','Real estate licenses confirmed','Environmental assessments reviewed','Title insurance confirmed'] },
-      { section:'Property & Assets', checks:['Asset locations reviewed','Occupancy rates documented','Lease terms summarized','Cap rates benchmarked'] },
-      { section:'Financial', checks:['Pro forma reviewed','Debt structure analyzed','Distribution waterfall confirmed','Exit strategy documented'] },
-    ]}
-  };
+    ];
+  }
 
   const ddProgress = {};
 
+  function populateDDDropdown() {
+    const select = document.getElementById('dd-select');
+    if (!select) return;
+    if (isDemoAccount()) return; // demo account keeps its original static example content
+
+    const managers = [];
+    const seen = new Set();
+    (fullHistory || []).forEach(h => {
+      if (!seen.has(h.manager_id)) {
+        seen.add(h.manager_id);
+        managers.push({ id: h.manager_id, name: h.manager_name });
+      }
+    });
+
+    const current = select.value;
+    select.innerHTML = '<option value="">Select Manager</option>' +
+      managers.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+    if (managers.some(m => String(m.id) === current)) select.value = current;
+  }
+
   function loadDDChecklist(key) {
     const container = document.getElementById('dd-content');
-    if (!key) { container.innerHTML = '<div style="text-align:center;color:#aab8d0;font-family:Courier New,monospace;font-size:12px;padding:40px;">Select an opportunity above to load its due diligence checklist.</div>'; return; }
-    const dd = ddChecklists[key];
+    if (!key) { container.innerHTML = '<div style="text-align:center;color:#aab8d0;font-family:Courier New,monospace;font-size:12px;padding:40px;">Select a manager above to load their due diligence checklist.</div>'; return; }
+
+    let name = key, items;
+    if (isDemoAccount() && (key === 'apex' || key === 'meridian')) {
+      const demo = { apex: { name:'Apex Growth Fund IV', items:[
+          { section:'Legal & Compliance', checks:['Fund formation documents reviewed','LP agreement reviewed','Regulatory filings verified','No pending litigation confirmed'] },
+          { section:'Investment Strategy', checks:['Investment thesis documented','Target sectors identified','Historical deal flow reviewed','Co-investment rights confirmed'] },
+          { section:'Team & Operations', checks:['GP team backgrounds verified','Key person provisions reviewed','Operational infrastructure assessed','Reference checks completed'] },
+          { section:'Financial', checks:['Audited financials reviewed','Fee structure documented (2/20)','Waterfall mechanics confirmed','Capital call schedule reviewed'] },
+        ]},
+        meridian: { name:'Meridian RE Fund III', items:[
+          { section:'Legal & Compliance', checks:['Fund structure verified','Real estate licenses confirmed','Environmental assessments reviewed','Title insurance confirmed'] },
+          { section:'Property & Assets', checks:['Asset locations reviewed','Occupancy rates documented','Lease terms summarized','Cap rates benchmarked'] },
+          { section:'Financial', checks:['Pro forma reviewed','Debt structure analyzed','Distribution waterfall confirmed','Exit strategy documented'] },
+        ]} };
+      name = demo[key].name;
+      items = demo[key].items;
+    } else {
+      const match = (fullHistory || []).find(h => String(h.manager_id) === String(key));
+      name = match ? match.manager_name : `Manager ${key}`;
+      items = genericChecklistTemplate();
+    }
+
     if (!ddProgress[key]) ddProgress[key] = {};
-    let html = `<div style="font-size:16px;font-weight:bold;color:#0A2472;margin-bottom:20px;">${dd.name}</div>`;
-    dd.items.forEach((section, si) => {
+    let html = `<div style="font-size:16px;font-weight:bold;color:#0A2472;margin-bottom:20px;">${name}</div>`;
+    items.forEach((section, si) => {
       html += `<div style="margin-bottom:20px;"><div class="section-title" style="margin-bottom:10px;">${section.section}</div>`;
       section.checks.forEach((check, ci) => {
         const id = `${key}-${si}-${ci}`;
@@ -2032,7 +2067,7 @@
       });
       html += '</div>';
     });
-    const total = dd.items.reduce((s,sec) => s + sec.checks.length, 0);
+    const total = items.reduce((s,sec) => s + sec.checks.length, 0);
     const done  = Object.values(ddProgress[key]).filter(Boolean).length;
     html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid #f0f4fa;font-family:Courier New,monospace;font-size:11px;color:#aab8d0;">${done} of ${total} items completed</div>`;
     container.innerHTML = html;
@@ -2041,8 +2076,8 @@
   function saveDDCheck(key, id, val) {
     if (!ddProgress[key]) ddProgress[key] = {};
     ddProgress[key][id] = val;
-    const dd = ddChecklists[key];
-    const total = dd.items.reduce((s,sec) => s + sec.checks.length, 0);
+    const items = (isDemoAccount() && (key === 'apex' || key === 'meridian')) ? null : genericChecklistTemplate();
+    const total = items ? items.reduce((s,sec) => s + sec.checks.length, 0) : 16;
     const done  = Object.values(ddProgress[key]).filter(Boolean).length;
     const footer = document.querySelector('#dd-content > div:last-child');
     if (footer) footer.textContent = `${done} of ${total} items completed`;
