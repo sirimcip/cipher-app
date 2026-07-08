@@ -1274,7 +1274,29 @@
 
       await fetchFullHistory();
       renderDirectorChart();
+      renderAllSubmissionsTab();
     } catch (e) { console.error("Could not load director data", e); }
+  }
+
+  function renderAllSubmissionsTab() {
+    const tbody = document.getElementById('dir-submissions-tbody');
+    if (!tbody) return;
+    if (!fullHistory.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#aab8d0;">No submissions yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = fullHistory.map(h => `
+      <tr>
+        <td>${h.manager_name}</td>
+        <td>${h.asset_class || '—'}</td>
+        <td>${h.period}</td>
+        <td>$${Number(h.total_invested).toLocaleString()}</td>
+        <td>$${Number(h.total_gained).toLocaleString()}</td>
+        <td>$${Number(h.total_lost).toLocaleString()}</td>
+        <td style="color:${h.net_change >= 0 ? '#2e7d32' : '#e74c3c'}">$${Number(h.net_change).toLocaleString()}</td>
+        <td>${h.submitted_at || '—'}</td>
+      </tr>
+    `).join('');
   }
 
   // ══ CHARTS ══
