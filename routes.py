@@ -37,6 +37,10 @@ class SubmissionCreate(BaseModel):
     total_lost: float
     notes: Optional[str] = None
     period: str
+    sector: Optional[str] = None
+    geography: Optional[str] = None
+    liquidity_tier: Optional[str] = None
+    vintage_year: Optional[int] = None
 
 # ── SIGNUP ──
 @router.post("/auth/signup")
@@ -97,6 +101,10 @@ def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
         existing.total_gained = data.total_gained
         existing.total_lost = data.total_lost
         existing.notes = data.notes
+        existing.sector = data.sector
+        existing.geography = data.geography
+        existing.liquidity_tier = data.liquidity_tier
+        existing.vintage_year = data.vintage_year
         existing.submitted = True
         existing.submitted_at = datetime.utcnow()
         db.commit()
@@ -109,6 +117,10 @@ def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
         total_lost=data.total_lost,
         notes=data.notes,
         period=data.period,
+        sector=data.sector,
+        geography=data.geography,
+        liquidity_tier=data.liquidity_tier,
+        vintage_year=data.vintage_year,
         submitted=True,
         submitted_at=datetime.utcnow()
     )
@@ -210,7 +222,11 @@ def get_all_submission_history(institution: str = "", db: Session = Depends(get_
             "net_change": net_change,
             "pct_return": round(pct_return, 2),
             "cumulative_value": cumulative_value,
-            "submitted_at": s.submitted_at.strftime("%b %d, %Y %H:%M") if s.submitted_at else "—"
+            "submitted_at": s.submitted_at.strftime("%b %d, %Y %H:%M") if s.submitted_at else "—",
+            "sector": s.sector,
+            "geography": s.geography,
+            "liquidity_tier": s.liquidity_tier,
+            "vintage_year": s.vintage_year
         })
 
     history.sort(key=lambda h: _period_sort_key(h["period"]))
