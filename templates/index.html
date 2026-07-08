@@ -959,14 +959,18 @@
   // ══ 2FA ══
   function generate6DigitCode() { return String(Math.floor(100000 + Math.random() * 900000)); }
 
-  function sendVerificationCode(user) {
-    generatedCode = generate6DigitCode();
-    console.log('%c[CIPHER 2FA] Your verification code: ' + generatedCode,
-      'background:#0A2472;color:#A8D4F5;font-size:16px;padding:6px 12px;border-radius:4px;');
-    console.log('(In production this will be sent via SMS to the registered phone number)');
+  async function sendVerificationCode(user) {
+    try {
+      await fetch(`${API}/auth/send-code`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: user.user_id, email: user.email })
+      });
+    } catch (e) {
+      console.error('Could not send verification email', e);
+    }
   }
 
-  function verifyTwoFA() {
+  async function verifyTwoFA() {
     const entered = document.getElementById('twofa-code').value.trim();
     const errorEl = document.getElementById('twofa-error');
     if (!entered || entered.length !== 6) {
@@ -974,16 +978,26 @@
       errorEl.style.display = 'block';
       return;
     }
-    if (entered !== generatedCode) {
-      errorEl.textContent = "Incorrect code. Please try again.";
+    try {
+      const res = await fetch(`${API}/auth/verify-code`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user_id: pendingUser.user_id, code: entered })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        errorEl.textContent = data.detail || "Incorrect code. Please try again.";
+        errorEl.style.display = 'block';
+        document.getElementById('twofa-code').value = '';
+        return;
+      }
+    } catch (e) {
+      errorEl.textContent = "Could not connect to server.";
       errorEl.style.display = 'block';
-      document.getElementById('twofa-code').value = '';
       return;
     }
     errorEl.style.display = 'none';
     currentUser = pendingUser;
     pendingUser = null;
-    generatedCode = null;
     enterDashboard();
   }
 
@@ -992,7 +1006,7 @@
     document.getElementById('twofa-code').value = '';
     document.getElementById('twofa-error').style.display = 'none';
     sendVerificationCode(pendingUser);
-    document.getElementById('twofa-hint').textContent = 'New code generated — check your browser console (F12).';
+    document.getElementById('twofa-hint').textContent = 'New code sent — check your email.';
   }
 
   // ══ SIGNUP ══
@@ -1050,9 +1064,9 @@
       const data = await res.json();
       if (!res.ok) { errorEl.textContent = data.detail || "Signup failed."; errorEl.style.display = 'block'; return; }
       errorEl.style.display = 'none';
-      pendingUser = { user_id: data.user_id, name: data.name, role: data.role, asset_class: data.asset_class };
+      pendingUser = { user_id: data.user_id, name: data.name, role: data.role, asset_class: data.asset_class, email: email };
       sendVerificationCode(pendingUser);
-      document.getElementById('twofa-hint').textContent = 'Account created! Check your browser console (F12) for your verification code.';
+      document.getElementById('twofa-hint').textContent = 'Account created! Check your email for your verification code.';
       document.getElementById('twofa-code').value = '';
       document.getElementById('twofa-error').style.display = 'none';
       show('twofa');
@@ -1078,9 +1092,9 @@
       const data = await res.json();
       if (!res.ok) { errorEl.textContent = data.detail || "Invalid credentials."; errorEl.style.display = 'block'; return; }
       errorEl.style.display = 'none';
-      pendingUser = data;
-      sendVerificationCode(data);
-      document.getElementById('twofa-hint').textContent = 'Check your browser console (F12) for your verification code (testing mode).';
+      pendingUser = { ...data, email: email };
+      sendVerificationCode(pendingUser);
+      document.getElementById('twofa-hint').textContent = 'Check your email for your verification code.';
       document.getElementById('twofa-code').value = '';
       document.getElementById('twofa-error').style.display = 'none';
       show('twofa');
