@@ -1025,7 +1025,7 @@
       const netChange = rows.reduce((s, r) => s + r.net_change, 0);
       const returnPct = invested ? (netChange / invested * 100) : 0;
       const weightPct = totalValue ? (value / totalValue * 100) : 0;
-      return { ac, value, returnPct, weightPct };
+      return { ac, value, returnPct, weightPct, netChange };
     });
 
     const cardsEl = document.getElementById('analytics-cards');
@@ -1113,7 +1113,7 @@
       const netChange = rows.reduce((s, r) => s + r.net_change, 0);
       const returnPct = invested ? (netChange / invested * 100) : 0;
       const weightPct = totalValue ? (value / totalValue * 100) : 0;
-      return { ac, value, returnPct, weightPct };
+      return { ac, value, returnPct, weightPct, netChange };
     });
     byClass.sort((a, b) => b.weightPct - a.weightPct);
     return { periods, latestPeriod, totalValue, totalReturnPct, classes, byClass };
@@ -2084,7 +2084,7 @@
   }
 
   // Report Builder
-  function buildReport() {
+  async function buildReport() {
     const title  = document.getElementById('rb-title').value;
     const period = document.getElementById('rb-period').value;
     const sections = {
@@ -2098,17 +2098,65 @@
       'Opportunity Pipeline': document.getElementById('rb-pipeline').checked,
       'Market Data':          document.getElementById('rb-market').checked,
     };
-    const sectionData = {
-      'Executive Summary':    '<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>+8.4%</strong> for the period ending ' + period + ', outperforming the S&P 500 benchmark by <strong>+2.2%</strong>. Total portfolio value stands at <strong>$124.6M</strong> across five asset classes. All managers submitted data for this period. No material concerns flagged.</p>',
-      'Portfolio Performance':'<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th><th>Benchmark</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>$42.1M</td><td style="color:#2e7d32">+11.2%</td><td>9.4%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>$31.5M</td><td style="color:#2e7d32">+9.8%</td><td>8.1%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Fixed Income</td><td>$24.8M</td><td style="color:#2e7d32">+4.1%</td><td>3.8%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Real Assets</td><td>$18.2M</td><td style="color:#2e7d32">+6.7%</td><td>5.9%</td></tr><tr><td style="padding:8px;">Operations</td><td>$8.0M</td><td style="color:#e74c3c">-1.2%</td><td>2.0%</td></tr></tbody></table>',
-      'Benchmark Comparison': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>YTD Return</th><th>vs Portfolio</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio</td><td style="color:#2e7d32">+8.4%</td><td>—</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">S&P 500</td><td>+6.2%</td><td style="color:#2e7d32">+2.2% alpha</td></tr><tr><td style="padding:8px;">MSCI World</td><td>+5.8%</td><td style="color:#2e7d32">+2.6% alpha</td></tr></tbody></table>',
-      'Attribution Analysis': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>33.8%</td><td>+11.2%</td><td style="color:#2e7d32">+3.79%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>25.3%</td><td>+9.8%</td><td style="color:#2e7d32">+2.48%</td></tr><tr><td style="padding:8px;">Operations</td><td>6.4%</td><td>-1.2%</td><td style="color:#e74c3c">-0.08%</td></tr></tbody></table>',
-      'Exposure Analysis':    '<p style="font-size:13px;color:#333;">Healthcare: 35% | Technology: 20% | Real Estate: 15% | Infrastructure: 10% | Other: 20%. Concentration risk flagged in Healthcare sector (>35% threshold).</p>',
-      'Liquidity Summary':    '<p style="font-size:13px;color:#333;">Available liquidity: $18.4M (14.8% of portfolio). 30-day liquidity: $31.2M. Illiquid assets: $74.8M. Next redemption: Sep 2026 ($4.2M).</p>',
-      'Private Markets':      '<p style="font-size:13px;color:#333;">Total PE commitments: $48.2M across 6 funds. Composite net IRR: 14.2%. PME vs S&P 500: 1.28x. Total fees YTD: $1.24M.</p>',
-      'Opportunity Pipeline': '<p style="font-size:13px;color:#333;">12 opportunities in pipeline. 5 under review. 3 approved YTD ($24.5M committed). 4 rejected YTD.</p>',
-      'Market Data':          '<p style="font-size:13px;color:#333;">Fed Funds Rate: 4.75% | 10-Yr Treasury: 4.32% | CPI: 3.1% | GDP Growth: 2.4%. S&P 500 YTD: +6.2%.</p>',
-    };
+
+    let sectionData = {};
+
+    if (isDemoAccount()) {
+      sectionData = {
+        'Executive Summary':    '<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>+8.4%</strong> for the period ending ' + period + ', outperforming the S&P 500 benchmark by <strong>+2.2%</strong>. Total portfolio value stands at <strong>$124.6M</strong> across five asset classes. All managers submitted data for this period. No material concerns flagged.</p>',
+        'Portfolio Performance':'<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th><th>Benchmark</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>$42.1M</td><td style="color:#2e7d32">+11.2%</td><td>9.4%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>$31.5M</td><td style="color:#2e7d32">+9.8%</td><td>8.1%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Fixed Income</td><td>$24.8M</td><td style="color:#2e7d32">+4.1%</td><td>3.8%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Real Assets</td><td>$18.2M</td><td style="color:#2e7d32">+6.7%</td><td>5.9%</td></tr><tr><td style="padding:8px;">Operations</td><td>$8.0M</td><td style="color:#e74c3c">-1.2%</td><td>2.0%</td></tr></tbody></table>',
+        'Benchmark Comparison': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>YTD Return</th><th>vs Portfolio</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio</td><td style="color:#2e7d32">+8.4%</td><td>—</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">S&P 500</td><td>+6.2%</td><td style="color:#2e7d32">+2.2% alpha</td></tr><tr><td style="padding:8px;">MSCI World</td><td>+5.8%</td><td style="color:#2e7d32">+2.6% alpha</td></tr></tbody></table>',
+        'Attribution Analysis': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>33.8%</td><td>+11.2%</td><td style="color:#2e7d32">+3.79%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>25.3%</td><td>+9.8%</td><td style="color:#2e7d32">+2.48%</td></tr><tr><td style="padding:8px;">Operations</td><td>6.4%</td><td>-1.2%</td><td style="color:#e74c3c">-0.08%</td></tr></tbody></table>',
+        'Exposure Analysis':    '<p style="font-size:13px;color:#333;">Healthcare: 35% | Technology: 20% | Real Estate: 15% | Infrastructure: 10% | Other: 20%. Concentration risk flagged in Healthcare sector (>35% threshold).</p>',
+        'Liquidity Summary':    '<p style="font-size:13px;color:#333;">Available liquidity: $18.4M (14.8% of portfolio). 30-day liquidity: $31.2M. Illiquid assets: $74.8M. Next redemption: Sep 2026 ($4.2M).</p>',
+        'Private Markets':      '<p style="font-size:13px;color:#333;">Total PE commitments: $48.2M across 6 funds. Composite net IRR: 14.2%. PME vs S&P 500: 1.28x. Total fees YTD: $1.24M.</p>',
+        'Opportunity Pipeline': '<p style="font-size:13px;color:#333;">12 opportunities in pipeline. 5 under review. 3 approved YTD ($24.5M committed). 4 rejected YTD.</p>',
+        'Market Data':          '<p style="font-size:13px;color:#333;">Fed Funds Rate: 4.75% | 10-Yr Treasury: 4.32% | CPI: 3.1% | GDP Growth: 2.4%. S&P 500 YTD: +6.2%.</p>',
+      };
+    } else {
+      const d = computeLatestBreakdown();
+      const noData = '<p style="font-size:13px;color:#aab8d0;">No data available yet — this will populate once your institution submits portfolio data.</p>';
+
+      if (!d) {
+        ['Executive Summary','Portfolio Performance','Benchmark Comparison','Attribution Analysis','Exposure Analysis','Liquidity Summary','Private Markets','Opportunity Pipeline','Market Data'].forEach(k => { sectionData[k] = noData; });
+      } else {
+        const bySector = computeGroupedBreakdown('sector');
+        const byGeo = computeGroupedBreakdown('geography');
+        const byTier = computeGroupedBreakdown('liquidity_tier');
+        const byVintage = computeGroupedBreakdown('vintage_year');
+
+        sectionData['Executive Summary'] = `<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%</strong> for the period ending ${d.latestPeriod}. Total portfolio value stands at <strong>$${(d.totalValue/1000000).toFixed(1)}M</strong> across ${d.classes.length} asset class${d.classes.length===1?'':'es'}.</p>`;
+
+        sectionData['Portfolio Performance'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th></tr></thead><tbody>' +
+          d.byClass.map(c => `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">${c.ac}</td><td>$${(c.value/1000000).toFixed(2)}M</td><td style="color:${c.returnPct>=0?'#2e7d32':'#e74c3c'}">${c.returnPct>=0?'+':''}${c.returnPct.toFixed(1)}%</td></tr>`).join('') +
+          '</tbody></table>';
+
+        let spyChange = null;
+        try { const spy = await fetchQuote('SPY'); if (spy) spyChange = parseFloat(spy['10. change percent']); } catch(e) {}
+        sectionData['Benchmark Comparison'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>Return</th></tr></thead><tbody>' +
+          `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio (${d.latestPeriod})</td><td style="color:${d.totalReturnPct>=0?'#2e7d32':'#e74c3c'}">${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%</td></tr>` +
+          (spyChange !== null ? `<tr><td style="padding:8px;">S&P 500 (today)</td><td>${spyChange>=0?'+':''}${spyChange.toFixed(2)}%</td></tr>` : '<tr><td style="padding:8px;">S&P 500</td><td>—</td></tr>') +
+          '</tbody></table>';
+
+        sectionData['Attribution Analysis'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody>' +
+          d.byClass.map(c => `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">${c.ac}</td><td>${c.weightPct.toFixed(1)}%</td><td>${c.returnPct>=0?'+':''}${c.returnPct.toFixed(1)}%</td><td style="color:${c.netChange>=0?'#2e7d32':'#e74c3c'}">$${(c.netChange/1000).toFixed(0)}K</td></tr>`).join('') +
+          '</tbody></table>';
+
+        sectionData['Exposure Analysis'] = `<p style="font-size:13px;color:#333;">${bySector.byGroup.map(c => `${c.label}: ${c.weightPct.toFixed(1)}%`).join(' | ')}</p>`;
+        sectionData['Liquidity Summary'] = `<p style="font-size:13px;color:#333;">${byTier.byGroup.map(c => `${c.label}: $${(c.value/1000000).toFixed(1)}M`).join(' | ')}</p>`;
+        sectionData['Private Markets'] = `<p style="font-size:13px;color:#333;">${byVintage.byGroup.map(c => `Vintage ${c.label}: $${(c.value/1000000).toFixed(1)}M (${c.returnPct>=0?'+':''}${c.returnPct.toFixed(1)}%)`).join(' | ')}</p>`;
+
+        const pipelineRows = document.querySelectorAll('#pipeline-tbody tr');
+        const realPipelineRows = Array.from(pipelineRows).filter(r => !r.textContent.includes('No opportunities'));
+        sectionData['Opportunity Pipeline'] = realPipelineRows.length
+          ? `<p style="font-size:13px;color:#333;">${realPipelineRows.length} opportunit${realPipelineRows.length===1?'y':'ies'} currently in pipeline.</p>`
+          : '<p style="font-size:13px;color:#aab8d0;">No opportunities in your pipeline yet.</p>';
+
+        sectionData['Market Data'] = spyChange !== null
+          ? `<p style="font-size:13px;color:#333;">S&P 500 (today): ${spyChange>=0?'+':''}${spyChange.toFixed(2)}%.</p>`
+          : noData;
+      }
+    }
 
     let html = `
       <div style="border-bottom:3px solid #0A2472;padding-bottom:16px;margin-bottom:24px;">
