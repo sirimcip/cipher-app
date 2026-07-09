@@ -1076,10 +1076,12 @@
     }
   }
 
-  function computeGroupedBreakdown(fieldName) {
+  function computeGroupedBreakdown(fieldName, targetPeriod) {
     if (!fullHistory || !fullHistory.length) return null;
     const periods = getPeriods(fullHistory);
-    const latestPeriod = periods[periods.length - 1];
+    const usePeriod = targetPeriod || periods[periods.length - 1];
+    if (!periods.includes(usePeriod)) return null; // no data submitted for this specific period
+    const latestPeriod = usePeriod;
     const latestRows = fullHistory.filter(h => h.period === latestPeriod);
     const totalValue = latestRows.reduce((s, r) => s + r.cumulative_value, 0);
     const groups = [...new Set(latestRows.map(r => r[fieldName] || 'Not Specified'))];
@@ -1096,10 +1098,12 @@
     return { periods, latestPeriod, totalValue, groups, byGroup };
   }
 
-  function computeLatestBreakdown() {
+  function computeLatestBreakdown(targetPeriod) {
     if (!fullHistory || !fullHistory.length) return null;
     const periods = getPeriods(fullHistory);
-    const latestPeriod = periods[periods.length - 1];
+    const usePeriod = targetPeriod || periods[periods.length - 1];
+    if (!periods.includes(usePeriod)) return null; // no data submitted for this specific period
+    const latestPeriod = usePeriod;
     const latestRows = fullHistory.filter(h => h.period === latestPeriod);
     const totalValue = latestRows.reduce((s, r) => s + r.cumulative_value, 0);
     const totalInvested = latestRows.reduce((s, r) => s + r.total_invested, 0);
@@ -2114,16 +2118,19 @@
         'Market Data':          '<p style="font-size:13px;color:#333;">Fed Funds Rate: 4.75% | 10-Yr Treasury: 4.32% | CPI: 3.1% | GDP Growth: 2.4%. S&P 500 YTD: +6.2%.</p>',
       };
     } else {
-      const d = computeLatestBreakdown();
+      const d = computeLatestBreakdown(period);
       const noData = '<p style="font-size:13px;color:#aab8d0;">No data available yet — this will populate once your institution submits portfolio data.</p>';
+      const noDataForPeriod = `<p style="font-size:13px;color:#aab8d0;">No data was submitted for ${period}.</p>`;
 
       if (!d) {
-        ['Executive Summary','Portfolio Performance','Benchmark Comparison','Attribution Analysis','Exposure Analysis','Liquidity Summary','Private Markets','Opportunity Pipeline','Market Data'].forEach(k => { sectionData[k] = noData; });
+        const periods = getPeriods(fullHistory || []);
+        const msg = periods.length ? noDataForPeriod : noData;
+        ['Executive Summary','Portfolio Performance','Benchmark Comparison','Attribution Analysis','Exposure Analysis','Liquidity Summary','Private Markets','Opportunity Pipeline','Market Data'].forEach(k => { sectionData[k] = msg; });
       } else {
-        const bySector = computeGroupedBreakdown('sector');
-        const byGeo = computeGroupedBreakdown('geography');
-        const byTier = computeGroupedBreakdown('liquidity_tier');
-        const byVintage = computeGroupedBreakdown('vintage_year');
+        const bySector = computeGroupedBreakdown('sector', period);
+        const byGeo = computeGroupedBreakdown('geography', period);
+        const byTier = computeGroupedBreakdown('liquidity_tier', period);
+        const byVintage = computeGroupedBreakdown('vintage_year', period);
 
         sectionData['Executive Summary'] = `<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%</strong> for the period ending ${d.latestPeriod}. Total portfolio value stands at <strong>$${(d.totalValue/1000000).toFixed(1)}M</strong> across ${d.classes.length} asset class${d.classes.length===1?'':'es'}.</p>`;
 
