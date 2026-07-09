@@ -789,7 +789,7 @@
             </div>
             <div class="input-group"><label>FORMAT</label><select><option>PDF Summary</option><option>Full Detail</option></select></div>
           </div>
-          <button class="btn-primary" style="max-width:100%;opacity:0.5;cursor:not-allowed">REPORT LOCKED — AWAITING SUBMISSIONS</button>
+          <button class="btn-primary" id="generate-report-btn" style="max-width:100%;opacity:0.5;cursor:not-allowed" disabled onclick="dirTab(document.querySelector('[onclick*=dir-builder]'),'dir-builder'); buildReport();">REPORT LOCKED — AWAITING SUBMISSIONS</button>
         </div>
       </div>
 
@@ -1619,7 +1619,15 @@
   async function loadDirectorData() {
     try {
       const inst = encodeURIComponent(currentUser.institution_name || '');
-      const res  = await fetch(`${API}/submissions/Q2 2026?institution=${inst}`);
+
+      // Determine the real latest reporting period from actual submission
+      // history, instead of assuming a fixed period that would go stale
+      // the moment a newer quarter gets submitted.
+      await fetchFullHistory();
+      const existingPeriods = getPeriods(fullHistory);
+      const targetPeriod = existingPeriods.length ? existingPeriods[existingPeriods.length - 1] : 'Q2 2026';
+
+      const res  = await fetch(`${API}/submissions/${encodeURIComponent(targetPeriod)}?institution=${inst}`);
       const data = await res.json();
 
       const totalInvested = data.managers.reduce((s, m) => s + (m.total_invested || 0), 0);
@@ -1650,7 +1658,14 @@
         reportBtn.textContent = data.complete ? 'GENERATE REPORT' : `REPORT LOCKED — ${data.missing} MISSING`;
       }
 
-      await fetchFullHistory();
+      const generateReportBtn = document.getElementById('generate-report-btn');
+      if (generateReportBtn) {
+        generateReportBtn.disabled = !data.complete;
+        generateReportBtn.style.opacity = data.complete ? '1' : '0.5';
+        generateReportBtn.style.cursor = data.complete ? 'pointer' : 'not-allowed';
+        generateReportBtn.textContent = data.complete ? 'GENERATE REPORT' : `REPORT LOCKED — ${data.missing} MISSING`;
+      }
+
       renderDirectorChart();
       renderAllSubmissionsTab();
       refreshDirectorAnalytics();
@@ -2258,12 +2273,34 @@ Current platform context: CIPHER Platform — institutional portfolio reporting 
     if (gained)   ctx += `- Total Gained: ${gained}\n`;
     if (submitted) ctx += `- Managers Submitted: ${submitted}\n`;
     if (missing)  ctx += `- Missing Submissions: ${missing}\n`;
-    ctx += "\nSample analytics data (from platform):\n";
-    ctx += "- Portfolio YTD Return: +8.4% vs S&P 500 +6.2% (alpha: +2.2%)\n";
-    ctx += "- Asset classes: Public Equity 33.8%, Private Equity 25.3%, Fixed Income 19.9%, Real Assets 14.6%, Operations 6.4%\n";
-    ctx += "- Total portfolio value: $124.6M\n";
-    ctx += "- Liquidity: $18.4M immediately available, $74.8M illiquid\n";
-    ctx += "- Top PE fund: Apex Growth III (IRR: 18.4%, TVPI: 1.42x)\n";
+
+    if (isDemoAccount()) {
+      ctx += "\nSample analytics data (from platform):\n";
+      ctx += "- Portfolio YTD Return: +8.4% vs S&P 500 +6.2% (alpha: +2.2%)\n";
+      ctx += "- Asset classes: Public Equity 33.8%, Private Equity 25.3%, Fixed Income 19.9%, Real Assets 14.6%, Operations 6.4%\n";
+      ctx += "- Total portfolio value: $124.6M\n";
+      ctx += "- Liquidity: $18.4M immediately available, $74.8M illiquid\n";
+      ctx += "- Top PE fund: Apex Growth III (IRR: 18.4%, TVPI: 1.42x)\n";
+    } else {
+      const d = computeLatestBreakdown();
+      if (d) {
+        ctx += `\nReal analytics data for ${d.latestPeriod}:\n`;
+        ctx += `- Total portfolio value: $${(d.totalValue/1000000).toFixed(1)}M\n`;
+        ctx += `- Portfolio return: ${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%\n`;
+        ctx += `- Asset classes: ${d.byClass.map(c => `${c.ac} ${c.weightPct.toFixed(1)}%`).join(', ')}\n`;
+
+        const byTier = computeGroupedBreakdown('liquidity_tier');
+        if (byTier) ctx += `- Liquidity breakdown: ${byTier.byGroup.map(c => `${c.label} $${(c.value/1000000).toFixed(1)}M`).join(', ')}\n`;
+
+        const byVintage = computeGroupedBreakdown('vintage_year');
+        if (byVintage) {
+          const best = byVintage.byGroup.reduce((a,b) => (!a || b.returnPct > a.returnPct) ? b : a, null);
+          if (best) ctx += `- Best performing vintage year: ${best.label} (${best.returnPct>=0?'+':''}${best.returnPct.toFixed(1)}%)\n`;
+        }
+      } else {
+        ctx += "\nNo portfolio data has been submitted yet for this institution.\n";
+      }
+    }
     return ctx;
   }
 
