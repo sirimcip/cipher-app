@@ -6,21 +6,22 @@
   <title>CIPHER</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
-      --navy: #0A2472;
-      --navy-dark: #071a54;
-      --navy-light: #1a3a8a;
-      --sky: #4A90D9;
-      --soft: #A8D4F5;
+      --navy: #0F1C33;
+      --navy-dark: #0A1424;
+      --navy-light: #1B2E4D;
+      --sky: #C6A15B;
+      --soft: #E8D9B5;
       --white: #ffffff;
-      --bg: #f0f4fa;
-      --red: #e74c3c;
-      --green: #2e7d32;
+      --bg: #F7F7F5;
+      --red: #A24C43;
+      --green: #3C7A5C;
     }
 
-    body { font-family: 'Georgia', serif; background: var(--navy); overflow: hidden; }
+    body { font-family: 'Inter', sans-serif; background: var(--navy); overflow: hidden; }
 
     .screen { position: fixed; inset: 0; display: none; }
     .screen.active { display: flex; }
@@ -44,7 +45,7 @@
     #logo-overlay.visible { opacity: 1; transform: scale(1); }
     #logo-overlay.zoom    { opacity: 1; transform: scale(40); }
     #logo-overlay.zoom .splash-name { opacity: 0; transition: opacity 0.4s ease; }
-    .splash-name { font-size: 64px; font-weight: bold; letter-spacing: 16px; color: var(--white); transition: opacity 0.5s ease; }
+    .splash-name { font-family: 'Fraunces', serif; font-size: 64px; font-weight: 600; letter-spacing: 6px; color: var(--white); transition: opacity 0.5s ease; }
     .splash-hex  { width: 80px; height: 92px; margin-bottom: 20px; display: block; }
 
     /* ── LOGIN ── */
@@ -55,8 +56,8 @@
       width: 50%; background: var(--navy);
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
     }
-    .login-left .brand-name { font-size: 48px; font-weight: bold; letter-spacing: 12px; color: var(--white); }
-    .login-left .brand-tag  { font-size: 9px; letter-spacing: 2.5px; color: var(--soft); font-family: 'Courier New', monospace; text-align: center; padding: 0 40px; line-height: 1.8; }
+    .login-left .brand-name { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 600; letter-spacing: 4px; color: var(--white); }
+    .login-left .brand-tag  { font-size: 9px; letter-spacing: 2.5px; color: var(--soft); font-family: 'JetBrains Mono', monospace; text-align: center; padding: 0 40px; line-height: 1.8; }
     .login-divider { width: 60px; height: 1px; background: var(--sky); }
     .login-right {
       width: 50%; background: var(--white);
@@ -65,25 +66,25 @@
     }
     .login-right > div { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 40px 60px; min-height: min-content; }
     #portal-select { margin: auto 0; }
-    .login-title  { font-size: 26px; font-weight: bold; color: var(--navy); margin-bottom: 8px; }
-    .login-sub    { font-size: 12px; color: var(--sky); font-family: 'Courier New', monospace; letter-spacing: 1px; margin-bottom: 40px; }
+    .login-title  { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+    .login-sub    { font-size: 12px; color: var(--sky); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; margin-bottom: 40px; }
 
     .form-group { width: 100%; max-width: 360px; margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 10px; letter-spacing: 2px; color: var(--navy); font-family: 'Courier New', monospace; margin-bottom: 8px; }
+    .form-group label { display: block; font-size: 10px; letter-spacing: 2px; color: var(--navy); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
     .form-group input, .form-group select {
       width: 100%; padding: 14px 16px; border: 1.5px solid #dde6f5; border-radius: 8px;
-      font-size: 14px; color: var(--navy); font-family: 'Georgia', serif; outline: none; transition: border 0.2s;
+      font-size: 14px; color: var(--navy); font-family: 'Inter', sans-serif; outline: none; transition: border 0.2s;
     }
     .form-group input:focus, .form-group select:focus { border-color: var(--sky); }
-    .form-hint { font-size: 10px; color: #aab8d0; font-family: 'Courier New', monospace; margin-top: 4px; }
+    .form-hint { font-size: 10px; color: #aab8d0; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
 
     .btn-primary {
       width: 100%; max-width: 360px; padding: 15px; background: var(--navy); color: var(--white);
       border: none; border-radius: 8px; font-size: 13px; letter-spacing: 3px;
-      font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s; margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer; transition: background 0.2s; margin-top: 8px;
     }
     .btn-primary:hover { background: var(--navy-light); }
-    .login-error { color: var(--red); font-size: 12px; font-family: 'Courier New', monospace; margin-top: 12px; display: none; }
+    .login-error { color: var(--red); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-top: 12px; display: none; }
 
     .portal-card {
       display: flex; align-items: center; gap: 16px; padding: 20px;
@@ -92,85 +93,106 @@
     .portal-card:hover { border-color: var(--sky); background: #f5f9ff; transform: translateX(4px); }
     .portal-icon  { font-size: 24px; color: var(--navy); flex-shrink: 0; }
     .portal-title { font-size: 14px; font-weight: bold; color: var(--navy); margin-bottom: 4px; }
-    .portal-desc  { font-size: 11px; color: #aab8d0; font-family: 'Courier New', monospace; }
+    .portal-desc  { font-size: 11px; color: #aab8d0; font-family: 'JetBrains Mono', monospace; }
     .portal-arrow { margin-left: auto; color: var(--sky); font-size: 18px; flex-shrink: 0; }
-    .back-btn { font-size: 11px; color: var(--sky); font-family: 'Courier New', monospace; letter-spacing: 1px; cursor: pointer; }
+    .back-btn { font-size: 11px; color: var(--sky); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; cursor: pointer; }
     .back-btn:hover { color: var(--navy); }
 
     /* ── DASHBOARD SHARED ── */
     #director-dash, #manager-dash { flex-direction: row; }
     .sidebar { width: 240px; background: var(--navy); display: flex; flex-direction: column; padding: 0; flex-shrink: 0; overflow-y: auto; max-height: 100vh; }
     .sidebar-header { padding: 28px 24px; border-bottom: 1px solid var(--navy-light); }
-    .sidebar-brand  { font-size: 20px; font-weight: bold; letter-spacing: 5px; color: var(--white); }
-    .sidebar-role   { font-size: 8px; color: var(--sky); letter-spacing: 2px; font-family: 'Courier New', monospace; margin-top: 4px; }
-    .nav-section-label { padding: 20px 24px 6px; font-size: 8px; letter-spacing: 2.5px; color: var(--sky); font-family: 'Courier New', monospace; }
+    .sidebar-brand  { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; letter-spacing: 3px; color: var(--white); }
+    .sidebar-role   { font-size: 8px; color: var(--sky); letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+    .nav-section-label { padding: 20px 24px 6px; font-size: 8px; letter-spacing: 2.5px; color: var(--sky); font-family: 'JetBrains Mono', monospace; }
     .nav-item { padding: 12px 24px; color: var(--soft); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
-    .nav-item:hover, .nav-item.active { background: var(--navy-light); color: var(--white); }
+    .nav-item:hover { background: var(--navy-light); color: var(--white); }
+    .nav-item.active { background: var(--navy-light); color: var(--sky); border-left: 2px solid var(--sky); padding-left: 22px; }
     .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sky); flex-shrink: 0; }
     .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--navy-light); }
-    .logout-btn { font-size: 11px; color: var(--soft); letter-spacing: 2px; font-family: 'Courier New', monospace; cursor: pointer; transition: color 0.2s; }
+    .logout-btn { font-size: 11px; color: var(--soft); letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; cursor: pointer; transition: color 0.2s; }
     .logout-btn:hover { color: var(--white); }
     .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .topbar { background: var(--white); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #dde6f5; flex-shrink: 0; }
-    .topbar-title { font-size: 17px; font-weight: bold; color: var(--navy); }
-    .topbar-badge { font-size: 11px; color: var(--sky); background: #eef5ff; padding: 6px 16px; border-radius: 20px; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+    .topbar-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--navy); }
+    .topbar-badge { font-size: 11px; color: var(--sky); background: #eef5ff; padding: 6px 16px; border-radius: 20px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
     .content { flex: 1; padding: 32px; overflow-y: auto; background: var(--bg); }
+
+    /* ── DIRECTOR OVERVIEW HEADER ── */
+    .dir-overview-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .dir-eyebrow { font-size: 10px; letter-spacing: 2.5px; color: var(--sky); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+    .dir-greeting { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 600; color: var(--navy); }
+    .dir-head-actions { display: flex; gap: 10px; align-items: center; }
+    .dir-search { padding: 10px 16px; border: 1px solid #dde6f5; border-radius: 8px; font-size: 12px; color: var(--navy); font-family: 'Inter', sans-serif; width: 220px; outline: none; }
+    .dir-search:focus { border-color: var(--sky); }
+    .dir-head-actions button { padding: 10px 18px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; font-size: 11px; letter-spacing: 1px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    .dir-head-actions button:hover { background: var(--navy-light); }
+
+    /* ── DIRECTOR TWO-COLUMN GRID ── */
+    .dir-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; align-items: start; }
+    .mini-empty { font-size: 12px; color: #aab8d0; padding: 8px 0; }
+    .mini-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f4fa; }
+    .mini-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .mini-row-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .mini-row-sub { font-size: 11px; color: #aab8d0; margin-top: 2px; }
+    .mini-row-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--navy); white-space: nowrap; }
+    @media (max-width: 1100px) { .dir-grid { grid-template-columns: 1fr; } }
 
     /* ── CARDS ── */
     .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
     .card { background: var(--white); border-radius: 12px; padding: 24px; border-top: 3px solid var(--sky); }
     .card.danger  { border-top-color: var(--red); }
     .card.success { border-top-color: var(--green); }
-    .card-label { font-size: 9px; letter-spacing: 2.5px; color: var(--sky); font-family: 'Courier New', monospace; margin-bottom: 10px; }
-    .card-value { font-size: 28px; font-weight: bold; color: var(--navy); }
+    .card-label { font-size: 9px; letter-spacing: 2.5px; color: var(--sky); font-family: 'JetBrains Mono', monospace; margin-bottom: 10px; }
+    .card-value { font-family: 'Fraunces', serif; font-size: 27px; font-weight: 500; color: var(--navy); }
     .card.danger .card-value  { color: var(--red); }
     .card.success .card-value { color: var(--green); }
     .card-sub { font-size: 11px; color: #aab8d0; margin-top: 6px; }
 
     /* ── TABLES ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .section-title  { font-size: 13px; font-weight: bold; color: var(--navy); letter-spacing: 1.5px; font-family: 'Courier New', monospace; }
+    .section-title  { font-size: 13px; font-weight: bold; color: var(--navy); letter-spacing: 1.5px; font-family: 'JetBrains Mono', monospace; }
     .table-wrap { background: var(--white); border-radius: 12px; overflow: hidden; margin-bottom: 32px; }
     table { width: 100%; border-collapse: collapse; }
     thead { background: var(--navy); }
-    thead th { padding: 14px 20px; text-align: left; font-size: 9px; letter-spacing: 2px; color: var(--soft); font-family: 'Courier New', monospace; font-weight: normal; }
+    thead th { padding: 14px 20px; text-align: left; font-size: 9px; letter-spacing: 2px; color: var(--soft); font-family: 'JetBrains Mono', monospace; font-weight: normal; }
     tbody tr { border-bottom: 1px solid #f0f4fa; transition: background 0.2s; }
     tbody tr:hover { background: #f8faff; }
     tbody td { padding: 14px 20px; font-size: 13px; color: var(--navy); }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 9px; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 9px; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
     .badge.submitted { background: #e8f5e9; color: var(--green); }
     .badge.missing   { background: #fdecea; color: var(--red); }
     .badge.flagged   { background: #fff8e1; color: #f57f17; }
 
     /* ── BUTTONS ── */
-    .btn-report { padding: 10px 22px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; font-size: 10px; letter-spacing: 2px; font-family: 'Courier New', monospace; cursor: pointer; transition: background 0.2s; }
+    .btn-report { padding: 10px 22px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; font-size: 10px; letter-spacing: 2px; font-family: 'JetBrains Mono', monospace; cursor: pointer; transition: background 0.2s; }
     .btn-report:hover    { background: var(--navy-light); }
     .btn-report:disabled { background: #aab8d0; cursor: not-allowed; }
 
     /* ── SUBMIT FORM ── */
     .submit-card { background: var(--white); border-radius: 12px; padding: 36px; max-width: 600px; }
-    .submit-card h2 { font-size: 16px; color: var(--navy); letter-spacing: 2px; font-family: 'Courier New', monospace; margin-bottom: 6px; }
+    .submit-card h2 { font-size: 17px; color: var(--navy); letter-spacing: 0.5px; font-family: 'Fraunces', serif; font-weight: 600; margin-bottom: 6px; }
     .submit-card p  { font-size: 12px; color: #aab8d0; margin-bottom: 28px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-    .input-group label { display: block; font-size: 9px; letter-spacing: 2px; color: var(--navy); font-family: 'Courier New', monospace; margin-bottom: 8px; }
+    .input-group label { display: block; font-size: 9px; letter-spacing: 2px; color: var(--navy); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; }
     .input-group input, .input-group textarea, .input-group select {
       width: 100%; padding: 12px 14px; border: 1.5px solid #dde6f5; border-radius: 8px;
-      font-size: 13px; color: var(--navy); font-family: 'Georgia', serif; outline: none; transition: border 0.2s;
+      font-size: 13px; color: var(--navy); font-family: 'Inter', sans-serif; outline: none; transition: border 0.2s;
     }
     .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--sky); }
     .input-group textarea { resize: vertical; min-height: 80px; }
-    .submit-success { background: #e8f5e9; border-radius: 8px; padding: 16px 20px; color: var(--green); font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 1px; display: none; margin-top: 16px; }
+    .submit-success { background: #e8f5e9; border-radius: 8px; padding: 16px 20px; color: var(--green); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1px; display: none; margin-top: 16px; }
 
     /* ── AI BOX ── */
     .ai-box { background: var(--navy); border-radius: 12px; padding: 28px; margin-bottom: 32px; }
-    .ai-label { font-size: 9px; letter-spacing: 2.5px; color: var(--sky); font-family: 'Courier New', monospace; margin-bottom: 12px; }
+    .ai-label { font-size: 9px; letter-spacing: 2.5px; color: var(--sky); font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
     .ai-text  { font-size: 14px; color: var(--white); line-height: 1.7; }
     .ai-text span { color: var(--soft); }
 
     /* ── CHARTS ── */
     .chart-card { background: var(--white); border-radius: 12px; padding: 24px; margin-bottom: 32px; }
     .chart-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-    .chart-tab  { padding: 8px 16px; background: var(--soft); color: var(--navy); border: none; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'Courier New', monospace; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
+    .chart-tab  { padding: 8px 16px; background: var(--soft); color: var(--navy); border: none; border-radius: 20px; font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
     .chart-tab:hover  { background: var(--sky); color: var(--white); }
     .chart-tab.active { background: var(--navy); color: var(--white); }
 
@@ -189,8 +211,8 @@
 <div id="splash">
   <div id="logo-overlay">
     <svg class="splash-hex" width="80" height="92" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:20px;">
-      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
-      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0F1C33" stroke="#C6A15B" stroke-width="2"/>
+      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#E8D9B5" stroke-width="0.8" opacity="0.5"/>
       <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="splash-name">CIPHER</div>
@@ -201,8 +223,8 @@
 <div id="login" class="screen">
   <div class="login-left">
     <svg width="70" height="80" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
-      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0F1C33" stroke="#C6A15B" stroke-width="2"/>
+      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#E8D9B5" stroke-width="0.8" opacity="0.5"/>
       <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="brand-name">CIPHER</div>
@@ -351,8 +373,8 @@
 <div id="twofa" class="screen">
   <div class="login-left">
     <svg width="70" height="80" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
-      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+      <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0F1C33" stroke="#C6A15B" stroke-width="2"/>
+      <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#E8D9B5" stroke-width="0.8" opacity="0.5"/>
       <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="brand-name">CIPHER</div>
@@ -421,37 +443,69 @@
 
       <!-- OVERVIEW TAB -->
       <div id="dir-overview">
+        <div class="dir-overview-head">
+          <div>
+            <div class="dir-eyebrow">DIRECTOR DASHBOARD</div>
+            <div class="dir-greeting" id="dir-greeting">Good afternoon</div>
+          </div>
+          <div class="dir-head-actions">
+            <input class="dir-search" type="text" placeholder="Search funds, managers…" />
+            <button onclick="dirTab(document.querySelector('.nav-item[onclick*=dir-submissions]'),'dir-submissions')">+ New Submission</button>
+          </div>
+        </div>
+
         <div class="cards">
           <div class="card"><div class="card-label">TOTAL INVESTED</div><div class="card-value" id="dir-total-invested">—</div><div class="card-sub">Across all managers</div></div>
           <div class="card success"><div class="card-label">TOTAL GAINED</div><div class="card-value" id="dir-total-gained">—</div><div class="card-sub">This period</div></div>
           <div class="card"><div class="card-label">SUBMITTED</div><div class="card-value" id="dir-submitted-count">—</div><div class="card-sub">Managers reported</div></div>
           <div class="card danger"><div class="card-label">MISSING</div><div class="card-value" id="dir-missing-count">—</div><div class="card-sub">Report incomplete</div></div>
         </div>
-        <div class="section-header">
-          <div class="section-title">MANAGER SUBMISSIONS</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>MANAGER</th><th>ASSET CLASS</th><th>INVESTED</th><th>GAINED</th><th>LOST</th><th>STATUS</th></tr></thead>
-            <tbody id="dir-overview-tbody"><tr><td colspan="6" style="text-align:center;color:#aab8d0;">Loading...</td></tr></tbody>
-          </table>
-        </div>
 
-        <!-- DIRECTOR GROWTH CHART -->
-        <div class="section-header" style="margin-top:8px;">
-          <div class="section-title">PORTFOLIO GROWTH OVER TIME</div>
-        </div>
-        <div class="chart-card">
-          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-            <button class="chart-tab active" onclick="setDirGroup('manager',this)">By Manager</button>
-            <button class="chart-tab" onclick="setDirGroup('asset_class',this)">By Asset Class</button>
+        <div class="dir-grid">
+          <div>
+            <div class="section-header">
+              <div class="section-title">PORTFOLIO GROWTH OVER TIME</div>
+            </div>
+            <div class="chart-card">
+              <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <button class="chart-tab active" onclick="setDirGroup('manager',this)">By Manager</button>
+                <button class="chart-tab" onclick="setDirGroup('asset_class',this)">By Asset Class</button>
+              </div>
+              <div class="chart-tabs" id="dir-metric-tabs">
+                <button class="chart-tab active" onclick="setDirMetric('cumulative_value',this)">Cumulative Value</button>
+                <button class="chart-tab" onclick="setDirMetric('net_change',this)">Gain / Loss</button>
+                <button class="chart-tab" onclick="setDirMetric('pct_return',this)">% Return</button>
+              </div>
+              <canvas id="directorGrowthChart" height="260"></canvas>
+            </div>
+
+            <div class="section-header" style="margin-top:8px;">
+              <div class="section-title">MANAGER SUBMISSIONS</div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>MANAGER</th><th>ASSET CLASS</th><th>INVESTED</th><th>GAINED</th><th>LOST</th><th>STATUS</th></tr></thead>
+                <tbody id="dir-overview-tbody"><tr><td colspan="6" style="text-align:center;color:#aab8d0;">Loading...</td></tr></tbody>
+              </table>
+            </div>
           </div>
-          <div class="chart-tabs" id="dir-metric-tabs">
-            <button class="chart-tab active" onclick="setDirMetric('cumulative_value',this)">Cumulative Value</button>
-            <button class="chart-tab" onclick="setDirMetric('net_change',this)">Gain / Loss</button>
-            <button class="chart-tab" onclick="setDirMetric('pct_return',this)">% Return</button>
+
+          <div>
+            <div class="chart-card" style="margin-bottom:20px;">
+              <div class="section-header" style="margin-bottom:14px;">
+                <div class="section-title">WATCH LIST</div>
+                <span class="badge missing" id="dir-watchlist-count">0 FLAGGED</span>
+              </div>
+              <div id="dir-watchlist"><div class="mini-empty">No managers flagged.</div></div>
+            </div>
+
+            <div class="chart-card">
+              <div class="section-header" style="margin-bottom:14px;">
+                <div class="section-title">ALLOCATION MIX</div>
+              </div>
+              <div id="dir-allocation"><div class="mini-empty">Loading…</div></div>
+            </div>
           </div>
-          <canvas id="directorGrowthChart" height="300"></canvas>
         </div>
       </div>
 
@@ -665,10 +719,10 @@
             <div class="input-group"><label>EXPECTED CLOSE</label><input type="text" id="deal-close" placeholder="e.g. Q3 2026"/></div>
             <div class="input-group"><label>SUBMITTED BY</label><input type="text" id="deal-submitter" placeholder="Manager name"/></div>
           </div>
-          <div class="input-group" style="margin-top:12px;"><label>NOTES</label><textarea id="deal-notes" placeholder="Brief description..." style="width:100%;padding:10px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;min-height:70px;resize:vertical;"></textarea></div>
+          <div class="input-group" style="margin-top:12px;"><label>NOTES</label><textarea id="deal-notes" placeholder="Brief description..." style="width:100%;padding:10px;border:1.5px solid #dde6f5;border-radius:8px;font-family:'Inter',sans-serif;min-height:70px;resize:vertical;"></textarea></div>
           <div style="display:flex;gap:12px;margin-top:16px;">
             <button class="btn-report" onclick="addDeal()">ADD TO PIPELINE</button>
-            <button class="btn-report" style="background:#f0f4fa;color:#0A2472;" onclick="document.getElementById('add-deal-form').style.display='none'">CANCEL</button>
+            <button class="btn-report" style="background:#f0f4fa;color:#0F1C33;" onclick="document.getElementById('add-deal-form').style.display='none'">CANCEL</button>
           </div>
         </div>
         <div class="table-wrap"><table>
@@ -684,7 +738,7 @@
       <div id="dir-diligence" style="display:none">
         <div class="section-header">
           <div class="section-title">DUE DILIGENCE CHECKLISTS</div>
-          <select id="dd-select" onchange="loadDDChecklist(this.value)" style="padding:8px 14px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;color:#0A2472;">
+          <select id="dd-select" onchange="loadDDChecklist(this.value)" style="padding:8px 14px;border:1.5px solid #dde6f5;border-radius:8px;font-family:'Inter',sans-serif;color:#0F1C33;">
             <option value="">Select Manager</option>
           </select>
         </div>
@@ -699,19 +753,19 @@
           <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(10,36,114,0.08);">
             <div class="section-title" style="margin-bottom:16px;">SELECT SECTIONS</div>
             <div style="display:flex;flex-direction:column;gap:10px;">
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-summary" checked> Executive Summary</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-perf" checked> Portfolio Performance</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-benchmark" checked> Benchmark Comparison</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-attribution"> Attribution Analysis</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-exposure"> Exposure Analysis</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-liquidity"> Liquidity Summary</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-private"> Private Markets</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-pipeline"> Opportunity Pipeline</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0A2472;cursor:pointer;"><input type="checkbox" id="rb-market"> Market Data</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-summary" checked> Executive Summary</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-perf" checked> Portfolio Performance</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-benchmark" checked> Benchmark Comparison</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-attribution"> Attribution Analysis</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-exposure"> Exposure Analysis</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-liquidity"> Liquidity Summary</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-private"> Private Markets</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-pipeline"> Opportunity Pipeline</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#0F1C33;cursor:pointer;"><input type="checkbox" id="rb-market"> Market Data</label>
             </div>
             <div style="margin-top:20px;">
-              <div class="input-group" style="margin-bottom:12px;"><label>REPORT TITLE</label><input type="text" id="rb-title" value="Investment Portfolio Report — Q2 2026" style="width:100%;padding:10px 12px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;color:#0A2472;"/></div>
-              <div class="input-group"><label>REPORTING PERIOD</label><select id="rb-period" style="width:100%;padding:10px 12px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;color:#0A2472;"><option>Q2 2026</option><option>Q1 2026</option><option>Q4 2025</option><option>Q3 2025</option></select></div>
+              <div class="input-group" style="margin-bottom:12px;"><label>REPORT TITLE</label><input type="text" id="rb-title" value="Investment Portfolio Report — Q2 2026" style="width:100%;padding:10px 12px;border:1.5px solid #dde6f5;border-radius:8px;font-family:'Inter',sans-serif;color:#0F1C33;"/></div>
+              <div class="input-group"><label>REPORTING PERIOD</label><select id="rb-period" style="width:100%;padding:10px 12px;border:1.5px solid #dde6f5;border-radius:8px;font-family:'Inter',sans-serif;color:#0F1C33;"><option>Q2 2026</option><option>Q1 2026</option><option>Q4 2025</option><option>Q3 2025</option></select></div>
             </div>
             <button class="btn-report" style="width:100%;margin-top:20px;padding:12px;" onclick="buildReport()">GENERATE REPORT PREVIEW</button>
           </div>
@@ -727,8 +781,8 @@
           <!-- Header -->
           <div style="background:var(--navy);border-radius:12px 12px 0 0;padding:20px 24px;display:flex;align-items:center;gap:14px;">
             <svg width="28" height="32" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0A2472" stroke="#4A90D9" stroke-width="2"/>
-              <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#A8D4F5" stroke-width="0.8" opacity="0.5"/>
+              <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0F1C33" stroke="#C6A15B" stroke-width="2"/>
+              <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#E8D9B5" stroke-width="0.8" opacity="0.5"/>
               <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <div>
@@ -744,7 +798,7 @@
             <div style="display:flex;gap:12px;align-items:flex-start;">
               <div style="width:32px;height:32px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0;">⬡</div>
               <div style="background:#f0f4fa;border-radius:0 12px 12px 12px;padding:14px 16px;max-width:80%;">
-                <div style="font-size:13px;color:#0A2472;line-height:1.7;">Hi! I'm CIPHER AI, your portfolio intelligence assistant. I can help you analyze your portfolio data, summarize performance, explain financial concepts, flag unusual patterns, and draft IC materials.<br><br>I provide <strong>information only</strong> — I won't give investment advice or recommendations. What would you like to know?</div>
+                <div style="font-size:13px;color:#0F1C33;line-height:1.7;">Hi! I'm CIPHER AI, your portfolio intelligence assistant. I can help you analyze your portfolio data, summarize performance, explain financial concepts, flag unusual patterns, and draft IC materials.<br><br>I provide <strong>information only</strong> — I won't give investment advice or recommendations. What would you like to know?</div>
                 <div style="font-size:9px;color:#aab8d0;font-family:'Courier New',monospace;margin-top:8px;">CIPHER AI · Portfolio Intelligence</div>
               </div>
             </div>
@@ -762,13 +816,13 @@
           <!-- Input area -->
           <div style="background:#fff;border-top:1px solid #dde6f5;border-radius:0 0 12px 12px;padding:16px 24px;display:flex;gap:12px;align-items:flex-end;">
             <textarea id="ai-input" placeholder="Ask anything about your portfolio..." 
-              style="flex:1;padding:12px 14px;border:1.5px solid #dde6f5;border-radius:8px;font-family:Georgia,serif;font-size:13px;color:#0A2472;resize:none;min-height:44px;max-height:120px;outline:none;transition:border 0.2s;"
-              onfocus="this.style.borderColor='#4A90D9'" onblur="this.style.borderColor='#dde6f5'"
+              style="flex:1;padding:12px 14px;border:1.5px solid #dde6f5;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:#0F1C33;resize:none;min-height:44px;max-height:120px;outline:none;transition:border 0.2s;"
+              onfocus="this.style.borderColor='#C6A15B'" onblur="this.style.borderColor='#dde6f5'"
               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIMessage()}"
               oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
             <button onclick="sendAIMessage()" id="ai-send-btn"
               style="padding:12px 20px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:10px;letter-spacing:2px;font-family:'Courier New',monospace;cursor:pointer;white-space:nowrap;transition:background 0.2s;"
-              onmouseover="this.style.background='#1a3a8a'" onmouseout="this.style.background='#0A2472'">SEND</button>
+              onmouseover="this.style.background='#1B2E4D'" onmouseout="this.style.background='#0F1C33'">SEND</button>
           </div>
         </div>
       </div>
@@ -1070,7 +1124,7 @@
       if (realPortValueChart) realPortValueChart.destroy();
       realPortValueChart = new Chart(pvCtx, {
         type: 'line',
-        data: { labels: periods, datasets: [{ label: 'Portfolio Value ($)', data: valueByPeriod, borderColor: '#0A2472', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0.3, fill: true }] },
+        data: { labels: periods, datasets: [{ label: 'Portfolio Value ($)', data: valueByPeriod, borderColor: '#0F1C33', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0.3, fill: true }] },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: 'Value ($)' } } } }
       });
     }
@@ -1207,7 +1261,7 @@
     const liqCtx = document.getElementById('chart-liquidity');
     if (liqCtx) {
       if (liquidityBar) liquidityBar.destroy();
-      liquidityBar = new Chart(liqCtx, { type: 'bar', data: { labels: byTier.byGroup.map(c => c.label), datasets: [{ label: 'Value ($)', data: byTier.byGroup.map(c => c.value), backgroundColor: '#4A90D9' }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+      liquidityBar = new Chart(liqCtx, { type: 'bar', data: { labels: byTier.byGroup.map(c => c.label), datasets: [{ label: 'Value ($)', data: byTier.byGroup.map(c => c.value), backgroundColor: '#C6A15B' }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
     }
 
     restoreChart('chart-currency');
@@ -1248,7 +1302,7 @@
     if (jCtx) {
       const valueByPeriod = d.periods.map(p => fullHistory.filter(h => h.period === p).reduce((s, r) => s + r.cumulative_value, 0));
       if (privateLine) privateLine.destroy();
-      privateLine = new Chart(jCtx, { type: 'line', data: { labels: d.periods, datasets: [{ label: 'Value ($)', data: valueByPeriod, borderColor: '#0A2472', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0, fill: true, pointRadius: 5 }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+      privateLine = new Chart(jCtx, { type: 'line', data: { labels: d.periods, datasets: [{ label: 'Value ($)', data: valueByPeriod, borderColor: '#0F1C33', backgroundColor: 'rgba(10,36,114,0.08)', tension: 0, fill: true, pointRadius: 5 }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
     }
 
     restoreChart('chart-cashflow');
@@ -1287,9 +1341,9 @@
     if (bCtx) {
       const labels = ['Portfolio (' + d.latestPeriod + ')'];
       const values = [d.totalReturnPct];
-      const colors = ['#0A2472'];
-      if (spyChange !== null) { labels.push('S&P 500 (Today)'); values.push(spyChange); colors.push('#4A90D9'); }
-      if (qqqChange !== null) { labels.push('Nasdaq (Today)'); values.push(qqqChange); colors.push('#A8D4F5'); }
+      const colors = ['#0F1C33'];
+      if (spyChange !== null) { labels.push('S&P 500 (Today)'); values.push(spyChange); colors.push('#C6A15B'); }
+      if (qqqChange !== null) { labels.push('Nasdaq (Today)'); values.push(qqqChange); colors.push('#E8D9B5'); }
       if (benchmarkBar) benchmarkBar.destroy();
       benchmarkBar = new Chart(bCtx, { type: 'bar', data: { labels, datasets: [{ label: 'Return %', data: values, backgroundColor: colors }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
     }
@@ -1638,6 +1692,16 @@
       document.getElementById('dir-submitted-count').textContent = `${data.submitted} / ${data.total_managers}`;
       document.getElementById('dir-missing-count').textContent   = data.missing;
 
+      const greetingEl = document.getElementById('dir-greeting');
+      if (greetingEl) {
+        const hour = new Date().getHours();
+        const part = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+        greetingEl.textContent = currentUser.institution_name ? `${part}, ${currentUser.institution_name}` : part;
+      }
+
+      renderDirWatchlist(data.managers);
+      renderDirAllocation(data.managers, totalInvested);
+
       const tbody = document.getElementById('dir-overview-tbody');
       if (tbody) {
         tbody.innerHTML = data.managers.map(m => `
@@ -1672,6 +1736,53 @@
     } catch (e) { console.error("Could not load director data", e); }
   }
 
+  // Watch List = managers who haven't submitted this period. Real data,
+  // just re-surfaced from the same set already loaded for the table above.
+  function renderDirWatchlist(managers) {
+    const el    = document.getElementById('dir-watchlist');
+    const count = document.getElementById('dir-watchlist-count');
+    if (!el) return;
+    const flagged = managers.filter(m => !m.submitted);
+    if (count) count.textContent = `${flagged.length} FLAGGED`;
+    if (!flagged.length) {
+      el.innerHTML = '<div class="mini-empty">All managers reported this period.</div>';
+      return;
+    }
+    el.innerHTML = flagged.map(m => `
+      <div class="mini-row">
+        <div>
+          <div class="mini-row-name">${m.name}</div>
+          <div class="mini-row-sub">${m.asset_class || 'Asset class not set'}</div>
+        </div>
+        <span class="badge missing">MISSING</span>
+      </div>
+    `).join('');
+  }
+
+  // Allocation Mix = invested capital grouped by asset class, computed from
+  // the same manager totals shown in the table — not a separate data source.
+  function renderDirAllocation(managers, totalInvested) {
+    const el = document.getElementById('dir-allocation');
+    if (!el) return;
+    const byClass = {};
+    managers.forEach(m => {
+      if (!m.submitted) return;
+      const cls = m.asset_class || 'Unclassified';
+      byClass[cls] = (byClass[cls] || 0) + (m.total_invested || 0);
+    });
+    const rows = Object.entries(byClass).sort((a, b) => b[1] - a[1]);
+    if (!rows.length || !totalInvested) {
+      el.innerHTML = '<div class="mini-empty">No allocation data yet.</div>';
+      return;
+    }
+    el.innerHTML = rows.map(([cls, amt]) => `
+      <div class="mini-row">
+        <div class="mini-row-name">${cls}</div>
+        <div class="mini-row-val">${((amt / totalInvested) * 100).toFixed(1)}%</div>
+      </div>
+    `).join('');
+  }
+
   function renderAllSubmissionsTab() {
     const tbody = document.getElementById('dir-submissions-tbody');
     if (!tbody) return;
@@ -1694,9 +1805,9 @@
   }
 
   // ══ CHARTS ══
-  const NAVY    = "#0A2472";
-  const SKY     = "#4A90D9";
-  const SOFT    = "#A8D4F5";
+  const NAVY    = "#0F1C33";
+  const SKY     = "#C6A15B";
+  const SOFT    = "#E8D9B5";
   const PALETTE = [NAVY, SKY, "#7C3AED", "#16A34A", "#DC2626", "#D97706", "#0891B2", SOFT];
   const METRIC_LABELS = {
     cumulative_value: "Cumulative Value ($)",
@@ -1794,7 +1905,7 @@
   }
 
   // ══ ANALYTICS CHARTS ══
-  const PALETTE8 = ["#0A2472","#4A90D9","#A8D4F5","#7C3AED","#16A34A","#DC2626","#D97706","#0891B2"];
+  const PALETTE8 = ["#0F1C33","#C6A15B","#E8D9B5","#7C3AED","#16A34A","#DC2626","#D97706","#0891B2"];
 
   function initAnalyticsCharts() {
     if (!isDemoAccount()) { refreshDirectorAnalytics(); return; }
@@ -1808,7 +1919,7 @@
     const pvCtx = document.getElementById('chart-port-value');
     if (pvCtx && !pvCtx.dataset.init) {
       pvCtx.dataset.init = '1';
-      new Chart(pvCtx, { type:'line', data:{ labels:['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026','Q2 2026'], datasets:[{ label:'Portfolio Value ($M)', data:[98.2,101.4,104.8,107.1,110.3,113.9,116.2,119.7,122.1,124.6], borderColor:'#0A2472', backgroundColor:'rgba(10,36,114,0.08)', tension:0.3, fill:true }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Value ($M)'}}} }});
+      new Chart(pvCtx, { type:'line', data:{ labels:['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026','Q2 2026'], datasets:[{ label:'Portfolio Value ($M)', data:[98.2,101.4,104.8,107.1,110.3,113.9,116.2,119.7,122.1,124.6], borderColor:'#0F1C33', backgroundColor:'rgba(10,36,114,0.08)', tension:0.3, fill:true }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Value ($M)'}}} }});
     }
     // Sector exposure
     const secCtx = document.getElementById('chart-sector');
@@ -1832,7 +1943,7 @@
     const liqCtx = document.getElementById('chart-liquidity');
     if (liqCtx && !liqCtx.dataset.init) {
       liqCtx.dataset.init = '1';
-      new Chart(liqCtx, { type:'bar', data:{ labels:['Immediate','30 Days','90 Days','1 Year','1-3 Years','>3 Years'], datasets:[{ label:'Value ($M)', data:[18.4,12.8,8.6,6.4,24.2,50.6], backgroundColor:['#2e7d32','#4A90D9','#A8D4F5','#D97706','#e74c3c','#7C3AED'] }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Value ($M)'}}} }});
+      new Chart(liqCtx, { type:'bar', data:{ labels:['Immediate','30 Days','90 Days','1 Year','1-3 Years','>3 Years'], datasets:[{ label:'Value ($M)', data:[18.4,12.8,8.6,6.4,24.2,50.6], backgroundColor:['#2e7d32','#C6A15B','#E8D9B5','#D97706','#e74c3c','#7C3AED'] }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Value ($M)'}}} }});
     }
     // Currency exposure
     const curCtx = document.getElementById('chart-currency');
@@ -1844,7 +1955,7 @@
     const jCtx = document.getElementById('chart-jcurve');
     if (jCtx && !jCtx.dataset.init) {
       jCtx.dataset.init = '1';
-      new Chart(jCtx, { type:'line', data:{ labels:['Year 0','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7'], datasets:[{ label:'Net Cash Flow ($M)', data:[-4.2,-6.8,-5.1,-2.3,1.8,6.4,11.2,16.8], borderColor:'#0A2472', backgroundColor:'rgba(10,36,114,0.08)', tension:0.4, fill:true, pointBackgroundColor: d => d.raw < 0 ? '#e74c3c' : '#2e7d32' }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Net Cash Flow ($M)'}}} }});
+      new Chart(jCtx, { type:'line', data:{ labels:['Year 0','Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7'], datasets:[{ label:'Net Cash Flow ($M)', data:[-4.2,-6.8,-5.1,-2.3,1.8,6.4,11.2,16.8], borderColor:'#0F1C33', backgroundColor:'rgba(10,36,114,0.08)', tension:0.4, fill:true, pointBackgroundColor: d => d.raw < 0 ? '#e74c3c' : '#2e7d32' }]}, options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{title:{display:true,text:'Net Cash Flow ($M)'}}} }});
     }
     // Cash flow forecast
     const cfCtx = document.getElementById('chart-cashflow');
@@ -1872,9 +1983,9 @@
     if (bCtx && !bCtx.dataset.init) {
       bCtx.dataset.init = '1';
       new Chart(bCtx, { type:'bar', data:{ labels:['Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026','Q2 2026'], datasets:[
-        { label:'Portfolio', data:[2.1,1.8,2.4,1.9,2.2,2.8], backgroundColor:'#0A2472' },
-        { label:'S&P 500',   data:[1.4,1.6,1.9,1.2,1.8,2.1], backgroundColor:'#4A90D9' },
-        { label:'MSCI World',data:[1.2,1.4,1.7,1.0,1.6,1.9], backgroundColor:'#A8D4F5' }
+        { label:'Portfolio', data:[2.1,1.8,2.4,1.9,2.2,2.8], backgroundColor:'#0F1C33' },
+        { label:'S&P 500',   data:[1.4,1.6,1.9,1.2,1.8,2.1], backgroundColor:'#C6A15B' },
+        { label:'MSCI World',data:[1.2,1.4,1.7,1.0,1.6,1.9], backgroundColor:'#E8D9B5' }
       ]}, options:{ responsive:true, plugins:{ legend:{ position:'bottom' }}, scales:{ y:{ title:{ display:true, text:'Return (%)' }}}}});
     }
     const aCtx = document.getElementById('chart-attribution');
@@ -1973,15 +2084,15 @@
     if (iCtx && !iCtx.dataset.init) {
       iCtx.dataset.init = '1';
       new Chart(iCtx, { type:'bar', data:{ labels:['S&P 500','Russell 2000','MSCI World','Bloomberg Agg','Portfolio'], datasets:[
-        { label:'YTD Return %', data:[6.2,3.8,5.8,2.1,8.4], backgroundColor:['#4A90D9','#4A90D9','#4A90D9','#4A90D9','#0A2472'] }
+        { label:'YTD Return %', data:[6.2,3.8,5.8,2.1,8.4], backgroundColor:['#C6A15B','#C6A15B','#C6A15B','#C6A15B','#0F1C33'] }
       ]}, options:{ responsive:true, plugins:{ legend:{ display:false }}, scales:{ y:{ title:{ display:true, text:'YTD Return (%)' }}}}});
     }
     const rCtx = document.getElementById('chart-rates');
     if (rCtx && !rCtx.dataset.init) {
       rCtx.dataset.init = '1';
       new Chart(rCtx, { type:'line', data:{ labels:['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025','Q2 2025','Q3 2025','Q4 2025','Q1 2026','Q2 2026'], datasets:[
-        { label:'Fed Funds Rate', data:[5.25,5.25,5.00,4.75,4.50,4.25,4.25,4.50,4.75,4.75], borderColor:'#0A2472', tension:0.3 },
-        { label:'10-Yr Treasury',  data:[4.20,4.36,4.18,4.57,4.28,4.14,4.22,4.45,4.38,4.32], borderColor:'#4A90D9', tension:0.3 }
+        { label:'Fed Funds Rate', data:[5.25,5.25,5.00,4.75,4.50,4.25,4.25,4.50,4.75,4.75], borderColor:'#0F1C33', tension:0.3 },
+        { label:'10-Yr Treasury',  data:[4.20,4.36,4.18,4.57,4.28,4.14,4.22,4.45,4.38,4.32], borderColor:'#C6A15B', tension:0.3 }
       ]}, options:{ responsive:true, plugins:{ legend:{ position:'bottom' }}, scales:{ y:{ title:{ display:true, text:'Rate (%)' }}}}});
     }
   }
@@ -2076,7 +2187,7 @@
     }
 
     if (!ddProgress[key]) ddProgress[key] = {};
-    let html = `<div style="font-size:16px;font-weight:bold;color:#0A2472;margin-bottom:20px;">${name}</div>`;
+    let html = `<div style="font-size:16px;font-weight:bold;color:#0F1C33;margin-bottom:20px;">${name}</div>`;
     items.forEach((section, si) => {
       html += `<div style="margin-bottom:20px;"><div class="section-title" style="margin-bottom:10px;">${section.section}</div>`;
       section.checks.forEach((check, ci) => {
@@ -2123,9 +2234,9 @@
     if (isDemoAccount()) {
       sectionData = {
         'Executive Summary':    '<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>+8.4%</strong> for the period ending ' + period + ', outperforming the S&P 500 benchmark by <strong>+2.2%</strong>. Total portfolio value stands at <strong>$124.6M</strong> across five asset classes. All managers submitted data for this period. No material concerns flagged.</p>',
-        'Portfolio Performance':'<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th><th>Benchmark</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>$42.1M</td><td style="color:#2e7d32">+11.2%</td><td>9.4%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>$31.5M</td><td style="color:#2e7d32">+9.8%</td><td>8.1%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Fixed Income</td><td>$24.8M</td><td style="color:#2e7d32">+4.1%</td><td>3.8%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Real Assets</td><td>$18.2M</td><td style="color:#2e7d32">+6.7%</td><td>5.9%</td></tr><tr><td style="padding:8px;">Operations</td><td>$8.0M</td><td style="color:#e74c3c">-1.2%</td><td>2.0%</td></tr></tbody></table>',
-        'Benchmark Comparison': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>YTD Return</th><th>vs Portfolio</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio</td><td style="color:#2e7d32">+8.4%</td><td>—</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">S&P 500</td><td>+6.2%</td><td style="color:#2e7d32">+2.2% alpha</td></tr><tr><td style="padding:8px;">MSCI World</td><td>+5.8%</td><td style="color:#2e7d32">+2.6% alpha</td></tr></tbody></table>',
-        'Attribution Analysis': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>33.8%</td><td>+11.2%</td><td style="color:#2e7d32">+3.79%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>25.3%</td><td>+9.8%</td><td style="color:#2e7d32">+2.48%</td></tr><tr><td style="padding:8px;">Operations</td><td>6.4%</td><td>-1.2%</td><td style="color:#e74c3c">-0.08%</td></tr></tbody></table>',
+        'Portfolio Performance':'<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th><th>Benchmark</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>$42.1M</td><td style="color:#2e7d32">+11.2%</td><td>9.4%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>$31.5M</td><td style="color:#2e7d32">+9.8%</td><td>8.1%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Fixed Income</td><td>$24.8M</td><td style="color:#2e7d32">+4.1%</td><td>3.8%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Real Assets</td><td>$18.2M</td><td style="color:#2e7d32">+6.7%</td><td>5.9%</td></tr><tr><td style="padding:8px;">Operations</td><td>$8.0M</td><td style="color:#e74c3c">-1.2%</td><td>2.0%</td></tr></tbody></table>',
+        'Benchmark Comparison': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>YTD Return</th><th>vs Portfolio</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio</td><td style="color:#2e7d32">+8.4%</td><td>—</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">S&P 500</td><td>+6.2%</td><td style="color:#2e7d32">+2.2% alpha</td></tr><tr><td style="padding:8px;">MSCI World</td><td>+5.8%</td><td style="color:#2e7d32">+2.6% alpha</td></tr></tbody></table>',
+        'Attribution Analysis': '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Public Equity</td><td>33.8%</td><td>+11.2%</td><td style="color:#2e7d32">+3.79%</td></tr><tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Private Equity</td><td>25.3%</td><td>+9.8%</td><td style="color:#2e7d32">+2.48%</td></tr><tr><td style="padding:8px;">Operations</td><td>6.4%</td><td>-1.2%</td><td style="color:#e74c3c">-0.08%</td></tr></tbody></table>',
         'Exposure Analysis':    '<p style="font-size:13px;color:#333;">Healthcare: 35% | Technology: 20% | Real Estate: 15% | Infrastructure: 10% | Other: 20%. Concentration risk flagged in Healthcare sector (>35% threshold).</p>',
         'Liquidity Summary':    '<p style="font-size:13px;color:#333;">Available liquidity: $18.4M (14.8% of portfolio). 30-day liquidity: $31.2M. Illiquid assets: $74.8M. Next redemption: Sep 2026 ($4.2M).</p>',
         'Private Markets':      '<p style="font-size:13px;color:#333;">Total PE commitments: $48.2M across 6 funds. Composite net IRR: 14.2%. PME vs S&P 500: 1.28x. Total fees YTD: $1.24M.</p>',
@@ -2149,18 +2260,18 @@
 
         sectionData['Executive Summary'] = `<p style="font-size:13px;color:#333;line-height:1.8;">The portfolio delivered a net return of <strong>${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%</strong> for the period ending ${d.latestPeriod}. Total portfolio value stands at <strong>$${(d.totalValue/1000000).toFixed(1)}M</strong> across ${d.classes.length} asset class${d.classes.length===1?'':'es'}.</p>`;
 
-        sectionData['Portfolio Performance'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th></tr></thead><tbody>' +
+        sectionData['Portfolio Performance'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Value</th><th>Return</th></tr></thead><tbody>' +
           d.byClass.map(c => `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">${c.ac}</td><td>$${(c.value/1000000).toFixed(2)}M</td><td style="color:${c.returnPct>=0?'#2e7d32':'#e74c3c'}">${c.returnPct>=0?'+':''}${c.returnPct.toFixed(1)}%</td></tr>`).join('') +
           '</tbody></table>';
 
         let spyChange = null;
         try { const spy = await fetchQuote('SPY'); if (spy) spyChange = parseFloat(spy['10. change percent']); } catch(e) {}
-        sectionData['Benchmark Comparison'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>Return</th></tr></thead><tbody>' +
+        sectionData['Benchmark Comparison'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Benchmark</th><th>Return</th></tr></thead><tbody>' +
           `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">Portfolio (${d.latestPeriod})</td><td style="color:${d.totalReturnPct>=0?'#2e7d32':'#e74c3c'}">${d.totalReturnPct>=0?'+':''}${d.totalReturnPct.toFixed(1)}%</td></tr>` +
           (spyChange !== null ? `<tr><td style="padding:8px;">S&P 500 (today)</td><td>${spyChange>=0?'+':''}${spyChange.toFixed(2)}%</td></tr>` : '<tr><td style="padding:8px;">S&P 500</td><td>—</td></tr>') +
           '</tbody></table>';
 
-        sectionData['Attribution Analysis'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0A2472;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody>' +
+        sectionData['Attribution Analysis'] = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead style="background:#0F1C33;color:#fff;"><tr><th style="padding:8px;">Asset Class</th><th>Weight</th><th>Return</th><th>Contribution</th></tr></thead><tbody>' +
           d.byClass.map(c => `<tr><td style="padding:8px;border-bottom:1px solid #f0f4fa;">${c.ac}</td><td>${c.weightPct.toFixed(1)}%</td><td>${c.returnPct>=0?'+':''}${c.returnPct.toFixed(1)}%</td><td style="color:${c.netChange>=0?'#2e7d32':'#e74c3c'}">$${(c.netChange/1000).toFixed(0)}K</td></tr>`).join('') +
           '</tbody></table>';
 
@@ -2181,15 +2292,15 @@
     }
 
     let html = `
-      <div style="border-bottom:3px solid #0A2472;padding-bottom:16px;margin-bottom:24px;">
-        <div style="font-size:9px;letter-spacing:3px;color:#4A90D9;font-family:Courier New,monospace;">CIPHER PLATFORM — CONFIDENTIAL</div>
-        <div style="font-size:22px;font-weight:bold;color:#0A2472;margin-top:6px;">${title}</div>
+      <div style="border-bottom:3px solid #0F1C33;padding-bottom:16px;margin-bottom:24px;">
+        <div style="font-size:9px;letter-spacing:3px;color:#C6A15B;font-family:Courier New,monospace;">CIPHER PLATFORM — CONFIDENTIAL</div>
+        <div style="font-size:22px;font-weight:bold;color:#0F1C33;margin-top:6px;">${title}</div>
         <div style="font-size:11px;color:#aab8d0;font-family:Courier New,monospace;margin-top:4px;">Prepared for Investment Committee Presentation · ${period}</div>
       </div>`;
 
     Object.entries(sections).forEach(([name, included]) => {
       if (!included) return;
-      html += `<div style="margin-bottom:24px;"><div style="font-size:10px;letter-spacing:2px;color:#4A90D9;font-family:Courier New,monospace;margin-bottom:10px;border-bottom:1px solid #f0f4fa;padding-bottom:6px;">${name.toUpperCase()}</div>${sectionData[name]}</div>`;
+      html += `<div style="margin-bottom:24px;"><div style="font-size:10px;letter-spacing:2px;color:#C6A15B;font-family:Courier New,monospace;margin-bottom:10px;border-bottom:1px solid #f0f4fa;padding-bottom:6px;">${name.toUpperCase()}</div>${sectionData[name]}</div>`;
     });
 
     html += `<div style="margin-top:32px;padding-top:16px;border-top:1px solid #f0f4fa;font-size:10px;color:#ccc;font-family:Courier New,monospace;">This report is for informational purposes only and does not constitute investment advice. Generated by CIPHER Platform.</div>`;
