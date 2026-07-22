@@ -631,6 +631,29 @@
           <div class="card"><div class="card-label">TOTAL FEES (YTD)</div><div class="card-value">$1.24M</div><div class="card-sub">Mgmt + carried interest</div></div>
           <div class="card"><div class="card-label">PME BENCHMARK</div><div class="card-value">1.28x</div><div class="card-sub">vs S&P 500 equivalent</div></div>
         </div>
+
+        <div id="private-capital-flow" style="display:none;">
+          <div class="section-header" style="margin-top:8px;">
+            <div class="section-title">CAPITAL FLOW — DPI / RVPI / TVPI</div>
+          </div>
+          <div class="cards" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+            <div class="card"><div class="card-label">DPI (CASH RETURNED)</div><div class="card-value" id="pm-dpi">—</div><div class="card-sub">Distributed ÷ Called</div></div>
+            <div class="card"><div class="card-label">RVPI (UNREALIZED)</div><div class="card-value" id="pm-rvpi">—</div><div class="card-sub">Residual NAV ÷ Called</div></div>
+            <div class="card"><div class="card-label">TVPI (TOTAL)</div><div class="card-value" id="pm-tvpi">—</div><div class="card-sub">DPI + RVPI</div></div>
+            <div class="card"><div class="card-label">PIC % (CALLED)</div><div class="card-value" id="pm-pic">—</div><div class="card-sub">Called ÷ Committed</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+            <div class="table-wrap" style="padding:24px;border-radius:12px;">
+              <div class="section-title" style="margin-bottom:14px;">RISK — LOSS RATIO &amp; ENTRY LEVERAGE</div>
+              <div id="pm-risk"><div class="mini-empty">Loading…</div></div>
+            </div>
+            <div class="table-wrap" style="padding:24px;border-radius:12px;">
+              <div class="section-title" style="margin-bottom:14px;">QUARTILE RANK <span style="font-weight:400;font-size:10px;color:#aab8d0;">(self-reported by manager)</span></div>
+              <div id="pm-quartile"><div class="mini-empty">No quartile data reported yet.</div></div>
+            </div>
+          </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
           <div class="table-wrap" style="padding:24px;border-radius:12px;">
             <div class="section-title" id="private-chart1-title" style="margin-bottom:16px;">J-CURVE ANALYSIS</div>
@@ -921,6 +944,34 @@
             </div>
             <div class="input-group"><label>VINTAGE YEAR (OPTIONAL)</label><input type="number" placeholder="e.g. 2021" id="m-vintage" min="1990" max="2100"/></div>
           </div>
+
+          <div class="section-title" style="margin-top:8px;margin-bottom:12px;">PRIVATE MARKETS DETAIL (OPTIONAL)</div>
+          <p style="font-size:11px;color:#8a94a8;margin-bottom:16px;">
+            Fill these in if this submission is a private fund commitment. Leaving them blank is fine —
+            metrics like DPI/RVPI just won't show for this submission until they're provided.
+          </p>
+          <div class="input-row">
+            <div class="input-group"><label>COMMITTED CAPITAL ($)</label><input type="number" placeholder="0.00" id="m-committed"/></div>
+            <div class="input-group"><label>CALLED CAPITAL ($)</label><input type="number" placeholder="0.00" id="m-called"/></div>
+          </div>
+          <div class="input-row">
+            <div class="input-group"><label>DISTRIBUTED CAPITAL ($)</label><input type="number" placeholder="0.00" id="m-distributed"/></div>
+            <div class="input-group"><label>RESIDUAL NAV ($)</label><input type="number" placeholder="0.00" id="m-residual-nav"/></div>
+          </div>
+          <div class="input-row">
+            <div class="input-group"><label>ENTRY LEVERAGE (NET DEBT / EBITDA, OPTIONAL)</label><input type="number" step="0.1" placeholder="e.g. 4.5" id="m-entry-leverage"/></div>
+            <div class="input-group"><label>QUARTILE RANK (OPTIONAL)</label>
+              <select id="m-quartile-rank">
+                <option value="">— Not specified —</option>
+                <option>1st Quartile</option><option>2nd Quartile</option><option>3rd Quartile</option><option>4th Quartile</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group" style="margin-bottom:24px">
+            <label>QUARTILE SOURCE (OPTIONAL)</label>
+            <input type="text" placeholder="e.g. Cambridge Associates, 2021 vintage buyout" id="m-quartile-source"/>
+          </div>
+
           <div class="input-group" style="margin-bottom:24px">
             <label>NOTES (OPTIONAL)</label>
             <textarea id="m-notes" placeholder="Any additional context for this period..."></textarea>
@@ -1311,6 +1362,99 @@
       if (privateBar) privateBar.destroy();
       privateBar = new Chart(cfCtx, { type: 'bar', data: { labels: byVintage.byGroup.map(c => c.label), datasets: [{ label: 'Return %', data: byVintage.byGroup.map(c => c.returnPct), backgroundColor: byVintage.byGroup.map(c => c.returnPct >= 0 ? '#2e7d32' : '#e74c3c') }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
     }
+
+    renderPrivateCapitalFlow();
+  }
+
+  // Capital-flow metrics (DPI/RVPI/TVPI, PIC%, Loss Ratio, Entry Leverage,
+  // Quartile) — computed ONLY from submissions where the manager actually
+  // filled in the optional private-markets detail fields. Nothing here is
+  // estimated or fabricated; funds without that detail are simply excluded
+  // from these specific calculations (they still show up everywhere else).
+  function renderPrivateCapitalFlow() {
+    const wrap = document.getElementById('private-capital-flow');
+    if (!wrap) return;
+
+    // Latest reported detail per manager (fullHistory is already period-sorted,
+    // so the last entry we see per manager is their most recent submission).
+    const latestByManager = {};
+    fullHistory.forEach(h => {
+      if (h.called_capital == null) return;
+      latestByManager[h.manager_id] = h;
+    });
+    const rows = Object.values(latestByManager);
+
+    if (!rows.length) {
+      wrap.style.display = 'none';
+      return;
+    }
+    wrap.style.display = 'block';
+
+    let totalCommitted = 0, totalCalled = 0, totalDistributed = 0, totalResidual = 0;
+    rows.forEach(r => {
+      totalCommitted += r.committed_capital || 0;
+      totalCalled     += r.called_capital || 0;
+      totalDistributed += r.distributed_capital || 0;
+      totalResidual     += r.residual_nav || 0;
+    });
+
+    const dpi  = totalCalled ? totalDistributed / totalCalled : null;
+    const rvpi = totalCalled ? totalResidual / totalCalled : null;
+    const tvpi = (dpi !== null && rvpi !== null) ? dpi + rvpi : null;
+    const pic  = totalCommitted ? (totalCalled / totalCommitted) * 100 : null;
+
+    document.getElementById('pm-dpi').textContent  = dpi  !== null ? dpi.toFixed(2)  + 'x' : '—';
+    document.getElementById('pm-rvpi').textContent = rvpi !== null ? rvpi.toFixed(2) + 'x' : '—';
+    document.getElementById('pm-tvpi').textContent = tvpi !== null ? tvpi.toFixed(2) + 'x' : '—';
+    document.getElementById('pm-pic').textContent  = pic  !== null ? pic.toFixed(1)  + '%' : '—';
+
+    // Loss ratio: share of funds (by called capital) currently below 1.0x TVPI
+    const withTvpi = rows.filter(r => r.called_capital);
+    let lossCapital = 0, totalCalledForLoss = 0;
+    withTvpi.forEach(r => {
+      const fundTvpi = ((r.distributed_capital || 0) + (r.residual_nav || 0)) / r.called_capital;
+      totalCalledForLoss += r.called_capital;
+      if (fundTvpi < 1.0) lossCapital += r.called_capital;
+    });
+    const lossRatio = totalCalledForLoss ? (lossCapital / totalCalledForLoss) * 100 : null;
+
+    // Entry leverage: called-capital-weighted average, across funds that reported it
+    const withLev = rows.filter(r => r.entry_leverage != null && r.called_capital);
+    let levWeighted = 0, levWeight = 0;
+    withLev.forEach(r => { levWeighted += r.entry_leverage * r.called_capital; levWeight += r.called_capital; });
+    const avgLeverage = levWeight ? levWeighted / levWeight : null;
+
+    const riskEl = document.getElementById('pm-risk');
+    riskEl.innerHTML = `
+      <div class="mini-row">
+        <div><div class="mini-row-name">Loss Ratio</div><div class="mini-row-sub">Called capital in funds under 1.0x TVPI</div></div>
+        <div class="mini-row-val">${lossRatio !== null ? lossRatio.toFixed(1) + '%' : 'Not enough data yet'}</div>
+      </div>
+      <div class="mini-row">
+        <div><div class="mini-row-name">Avg. Entry Leverage</div><div class="mini-row-sub">Called-capital-weighted, net debt ÷ EBITDA</div></div>
+        <div class="mini-row-val">${avgLeverage !== null ? avgLeverage.toFixed(1) + 'x' : 'Not reported yet'}</div>
+      </div>
+      <div class="mini-row">
+        <div><div class="mini-row-name">Funds Reporting Detail</div><div class="mini-row-sub">Of ${new Set(fullHistory.map(h => h.manager_id)).size} total managers</div></div>
+        <div class="mini-row-val">${rows.length}</div>
+      </div>
+    `;
+
+    const quartileEl = document.getElementById('pm-quartile');
+    const withQuartile = rows.filter(r => r.quartile_rank);
+    if (!withQuartile.length) {
+      quartileEl.innerHTML = '<div class="mini-empty">No quartile data reported yet.</div>';
+    } else {
+      quartileEl.innerHTML = withQuartile.map(r => `
+        <div class="mini-row">
+          <div>
+            <div class="mini-row-name">${r.manager_name}</div>
+            <div class="mini-row-sub">${r.quartile_source || 'Source not specified'}</div>
+          </div>
+          <div class="mini-row-val">${r.quartile_rank}</div>
+        </div>
+      `).join('');
+    }
   }
 
   async function renderRealBenchmarks() {
@@ -1617,6 +1761,13 @@
     const geography = document.getElementById('m-geography').value;
     const liquidity = document.getElementById('m-liquidity').value;
     const vintage   = document.getElementById('m-vintage').value;
+    const committed   = document.getElementById('m-committed').value;
+    const called      = document.getElementById('m-called').value;
+    const distributed = document.getElementById('m-distributed').value;
+    const residualNav  = document.getElementById('m-residual-nav').value;
+    const entryLeverage = document.getElementById('m-entry-leverage').value;
+    const quartileRank   = document.getElementById('m-quartile-rank').value;
+    const quartileSource = document.getElementById('m-quartile-source').value;
     if (!invested || !gained || !lost || !currentUser) return;
 
     try {
@@ -1632,7 +1783,14 @@
           sector: sector || null,
           geography: geography || null,
           liquidity_tier: liquidity || null,
-          vintage_year: vintage ? parseInt(vintage) : null
+          vintage_year: vintage ? parseInt(vintage) : null,
+          committed_capital: committed ? parseFloat(committed) : null,
+          called_capital: called ? parseFloat(called) : null,
+          distributed_capital: distributed ? parseFloat(distributed) : null,
+          residual_nav: residualNav ? parseFloat(residualNav) : null,
+          entry_leverage: entryLeverage ? parseFloat(entryLeverage) : null,
+          quartile_rank: quartileRank || null,
+          quartile_source: quartileSource || null
         })
       });
       if (res.ok) {

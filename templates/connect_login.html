@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CIPHER Connect — Sign In</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy: #0F1C33;
+      --navy-deep: #0A1424;
+      --navy-panel: #16233D;
+      --line: #24304a;
+      --sky: #C6A15B;
+      --soft: #E8D9B5;
+      --white: #ffffff;
+      --text-dim: #9aa5bd;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--navy);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='115' viewBox='0 0 100 115'%3E%3Cpolygon points='50,5 95,28 95,87 50,110 5,87 5,28' fill='none' stroke='%23C6A15B' stroke-opacity='0.07' stroke-width='2'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 90px 104px;
+    }
+
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+
+    .login-card {
+      width: 100%; max-width: 420px;
+      background: var(--navy-panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 44px 40px; box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+    }
+
+    .login-logo { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+    .login-logo svg { margin-bottom: 14px; }
+    .login-brand { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; letter-spacing: 4px; color: var(--white); }
+    .login-brand span { color: var(--sky); }
+    .login-tagline { font-size: 10.5px; letter-spacing: 2px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 6px; }
+
+    .step-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--white); text-align: center; margin-bottom: 4px; }
+    .step-sub { font-size: 11px; color: var(--sky); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; text-align: center; margin-bottom: 26px; }
+
+    /* ── PORTAL CARDS ── */
+    .portal-card {
+      display: flex; align-items: center; gap: 14px; padding: 18px 18px;
+      background: var(--navy-deep); border: 1.5px solid var(--line); border-radius: 10px;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 14px;
+    }
+    .portal-card:last-child { margin-bottom: 0; }
+    .portal-card:hover { border-color: var(--sky); background: rgba(198,161,91,0.06); transform: translateX(4px); }
+    .portal-icon { font-size: 20px; color: var(--sky); flex-shrink: 0; }
+    .portal-title { font-size: 13.5px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+    .portal-desc { font-size: 10.5px; color: var(--text-dim); line-height: 1.4; }
+    .portal-arrow { margin-left: auto; color: var(--sky); font-size: 16px; flex-shrink: 0; }
+
+    /* ── LOGIN FORM FIELDS ── */
+    .field-group { margin-bottom: 18px; }
+    .field-label { display: block; font-size: 10.5px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
+    .field-input {
+      width: 100%; background: var(--navy-deep); border: 1px solid var(--line); border-radius: 6px;
+      color: var(--white); font-family: 'Inter', sans-serif; font-size: 13px; padding: 12px 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field-input:focus { border-color: var(--sky); }
+    .field-input::placeholder { color: #5c6884; }
+
+    .password-wrapper { position: relative; width: 100%; }
+    .password-wrapper input { padding-right: 40px; }
+    .eye-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.5; transition: opacity 0.2s; user-select: none; }
+    .eye-toggle:hover { opacity: 1; }
+
+    .login-btn {
+      width: 100%; padding: 13px; margin-top: 8px; background: var(--sky); color: var(--navy-deep);
+      border: none; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+      font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s;
+    }
+    .login-btn:hover { background: var(--soft); }
+
+    .back-row { margin-bottom: 20px; }
+    .back-btn { font-size: 11px; color: var(--sky); font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; cursor: pointer; text-decoration: none; }
+    .back-btn:hover { color: var(--soft); }
+
+    .login-foot { text-align: center; margin-top: 20px; font-size: 11.5px; color: var(--text-dim); }
+    .login-foot a { color: var(--sky); text-decoration: none; cursor: pointer; }
+    .login-foot a:hover { text-decoration: underline; }
+
+    .back-home { position: fixed; top: 24px; left: 28px; font-size: 11px; letter-spacing: 1px; color: var(--text-dim); text-decoration: none; font-family: 'JetBrains Mono', monospace; }
+    .back-home:hover { color: var(--sky); }
+  </style>
+</head>
+<body>
+
+  <a class="back-home" href="/">← BACK TO HOME</a>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="44" height="51" viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="50,5 95,28 95,87 50,110 5,87 5,28" fill="#0F1C33" stroke="#C6A15B" stroke-width="2"/>
+        <polygon points="50,14 85,33 85,82 50,101 15,82 15,33" fill="none" stroke="#E8D9B5" stroke-width="0.8" opacity="0.5"/>
+        <polyline points="74,42 50,29 26,42 26,73 50,86 74,73" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="login-brand">CIPHER <span>CONNECT</span></div>
+      <div class="login-tagline">INSTITUTIONAL DEAL NETWORK</div>
+    </div>
+
+    <!-- PORTAL SELECT -->
+    <div id="portal-select">
+      <div class="step-title">How are you joining Connect?</div>
+      <div class="step-sub">SELECT YOUR PORTAL TO CONTINUE</div>
+      <div class="portal-card" onclick="showPortal('investor')">
+        <div class="portal-icon">◈</div>
+        <div><div class="portal-title">Investor Portal</div><div class="portal-desc">Review deals, run diligence, track your pipeline</div></div>
+        <div class="portal-arrow">→</div>
+      </div>
+      <div class="portal-card" onclick="showPortal('fund')">
+        <div class="portal-icon">⬡</div>
+        <div><div class="portal-title">Fund / Founder Portal</div><div class="portal-desc">Publish your raise and reach verified investors</div></div>
+        <div class="portal-arrow">→</div>
+      </div>
+    </div>
+
+    <!-- INVESTOR LOGIN -->
+    <div id="investor-login" style="display:none;">
+      <div class="back-row"><span class="back-btn" onclick="showPortalSelect()">← Back</span></div>
+      <div class="step-title">Investor Portal</div>
+      <div class="step-sub">SIGN IN TO YOUR ACCOUNT</div>
+      <div class="field-group">
+        <label class="field-label">EMAIL</label>
+        <input class="field-input" type="email" id="investor-email" placeholder="you@firm.com"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">PASSWORD</label>
+        <div class="password-wrapper">
+          <input class="field-input" type="password" id="investor-password" placeholder="••••••••"/>
+          <span class="eye-toggle" onclick="togglePw('investor-password', this)">👁</span>
+        </div>
+      </div>
+      <button class="login-btn" onclick="signIn('investor')">LOG IN</button>
+      <div class="login-foot">No account? <a onclick="showPortal('investor')">Sign up</a></div>
+    </div>
+
+    <!-- FUND / FOUNDER LOGIN -->
+    <div id="fund-login" style="display:none;">
+      <div class="back-row"><span class="back-btn" onclick="showPortalSelect()">← Back</span></div>
+      <div class="step-title">Fund / Founder Portal</div>
+      <div class="step-sub">SIGN IN TO YOUR ACCOUNT</div>
+      <div class="field-group">
+        <label class="field-label">EMAIL</label>
+        <input class="field-input" type="email" id="fund-email" placeholder="you@company.com"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">PASSWORD</label>
+        <div class="password-wrapper">
+          <input class="field-input" type="password" id="fund-password" placeholder="••••••••"/>
+          <span class="eye-toggle" onclick="togglePw('fund-password', this)">👁</span>
+        </div>
+      </div>
+      <button class="login-btn" onclick="signIn('fund')">LOG IN</button>
+      <div class="login-foot">No account? <a onclick="showPortal('fund')">Sign up</a></div>
+    </div>
+
+  </div>
+
+  <script>
+    function showPortal(role) {
+      document.getElementById('portal-select').style.display = 'none';
+      document.getElementById('investor-login').style.display = 'none';
+      document.getElementById('fund-login').style.display = 'none';
+      document.getElementById(role + '-login').style.display = 'block';
+    }
+    function showPortalSelect() {
+      document.getElementById('investor-login').style.display = 'none';
+      document.getElementById('fund-login').style.display = 'none';
+      document.getElementById('portal-select').style.display = 'block';
+    }
+    function togglePw(id, el) {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      el.style.opacity = input.type === 'text' ? '1' : '0.5';
+    }
+    function signIn(role) {
+      // No credential check yet — Connect opens straight through.
+      window.location.href = role === 'investor' ? '/connect/investor' : '/connect';
+    }
+  </script>
+
+</body>
+</html>
