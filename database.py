@@ -55,6 +55,13 @@ class Submission(Base):
     geography = Column(String, nullable=True)
     liquidity_tier = Column(String, nullable=True)
     vintage_year = Column(Integer, nullable=True)
+    committed_capital = Column(Float, nullable=True)
+    called_capital = Column(Float, nullable=True)
+    distributed_capital = Column(Float, nullable=True)
+    residual_nav = Column(Float, nullable=True)
+    entry_leverage = Column(Float, nullable=True)
+    quartile_rank = Column(String, nullable=True)
+    quartile_source = Column(String, nullable=True)
     manager = relationship("User", back_populates="submissions")
 
 def migrate_new_columns():
@@ -63,6 +70,13 @@ def migrate_new_columns():
         "geography": "TEXT",
         "liquidity_tier": "TEXT",
         "vintage_year": "INTEGER",
+        "committed_capital": "REAL",
+        "called_capital": "REAL",
+        "distributed_capital": "REAL",
+        "residual_nav": "REAL",
+        "entry_leverage": "REAL",
+        "quartile_rank": "TEXT",
+        "quartile_source": "TEXT",
     }
     with engine.connect() as conn:
         for col_name, col_type in new_columns.items():

@@ -41,6 +41,13 @@ class SubmissionCreate(BaseModel):
     geography: Optional[str] = None
     liquidity_tier: Optional[str] = None
     vintage_year: Optional[int] = None
+    committed_capital: Optional[float] = None
+    called_capital: Optional[float] = None
+    distributed_capital: Optional[float] = None
+    residual_nav: Optional[float] = None
+    entry_leverage: Optional[float] = None
+    quartile_rank: Optional[str] = None
+    quartile_source: Optional[str] = None
 
 # ── SIGNUP ──
 @router.post("/auth/signup")
@@ -105,6 +112,13 @@ def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
         existing.geography = data.geography
         existing.liquidity_tier = data.liquidity_tier
         existing.vintage_year = data.vintage_year
+        existing.committed_capital = data.committed_capital
+        existing.called_capital = data.called_capital
+        existing.distributed_capital = data.distributed_capital
+        existing.residual_nav = data.residual_nav
+        existing.entry_leverage = data.entry_leverage
+        existing.quartile_rank = data.quartile_rank
+        existing.quartile_source = data.quartile_source
         existing.submitted = True
         existing.submitted_at = datetime.utcnow()
         db.commit()
@@ -121,6 +135,13 @@ def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
         geography=data.geography,
         liquidity_tier=data.liquidity_tier,
         vintage_year=data.vintage_year,
+        committed_capital=data.committed_capital,
+        called_capital=data.called_capital,
+        distributed_capital=data.distributed_capital,
+        residual_nav=data.residual_nav,
+        entry_leverage=data.entry_leverage,
+        quartile_rank=data.quartile_rank,
+        quartile_source=data.quartile_source,
         submitted=True,
         submitted_at=datetime.utcnow()
     )
@@ -154,7 +175,14 @@ def get_submissions(period: str, institution: str = "", db: Session = Depends(ge
             "total_invested": sub.total_invested if sub else None,
             "total_gained": sub.total_gained if sub else None,
             "total_lost": sub.total_lost if sub else None,
-            "submitted_at": sub.submitted_at if sub else None
+            "submitted_at": sub.submitted_at if sub else None,
+            "committed_capital": sub.committed_capital if sub else None,
+            "called_capital": sub.called_capital if sub else None,
+            "distributed_capital": sub.distributed_capital if sub else None,
+            "residual_nav": sub.residual_nav if sub else None,
+            "entry_leverage": sub.entry_leverage if sub else None,
+            "quartile_rank": sub.quartile_rank if sub else None,
+            "quartile_source": sub.quartile_source if sub else None
         })
 
     return {
@@ -177,7 +205,14 @@ def get_manager_submissions(manager_id: int, db: Session = Depends(get_db)):
                 "total_invested": s.total_invested,
                 "total_gained": s.total_gained,
                 "total_lost": s.total_lost,
-                "submitted_at": s.submitted_at
+                "submitted_at": s.submitted_at,
+                "committed_capital": s.committed_capital,
+                "called_capital": s.called_capital,
+                "distributed_capital": s.distributed_capital,
+                "residual_nav": s.residual_nav,
+                "entry_leverage": s.entry_leverage,
+                "quartile_rank": s.quartile_rank,
+                "quartile_source": s.quartile_source
             } for s in submissions
         ]
     }
@@ -226,7 +261,14 @@ def get_all_submission_history(institution: str = "", db: Session = Depends(get_
             "sector": s.sector,
             "geography": s.geography,
             "liquidity_tier": s.liquidity_tier,
-            "vintage_year": s.vintage_year
+            "vintage_year": s.vintage_year,
+            "committed_capital": s.committed_capital,
+            "called_capital": s.called_capital,
+            "distributed_capital": s.distributed_capital,
+            "residual_nav": s.residual_nav,
+            "entry_leverage": s.entry_leverage,
+            "quartile_rank": s.quartile_rank,
+            "quartile_source": s.quartile_source
         })
 
     history.sort(key=lambda h: _period_sort_key(h["period"]))

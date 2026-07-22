@@ -29,6 +29,14 @@ def root():
 def platform():
     return FileResponse("templates/index.html")
 
+@app.get("/connect/login")
+def connect_login():
+    return FileResponse("templates/connect_login.html")
+
+@app.get("/connect/investor")
+def connect_investor():
+    return FileResponse("templates/connect_investor.html")
+
 @app.get("/connect")
 def connect():
     return FileResponse("templates/connect.html")
