@@ -95,6 +95,30 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         "institution_name": user.institution_name
     }
 
+# ══════════════════════════════════════════════════════════════════
+# TEMPORARY — LOGIN BYPASS (team access while credentials/2FA are paused)
+# Remove this whole endpoint to restore normal login-only access.
+# Added: paused at user's request so a teammate can access without
+# credentials or email verification while work is split across the team.
+# ══════════════════════════════════════════════════════════════════
+@router.post("/auth/bypass-login")
+def bypass_login(data: dict, db: Session = Depends(get_db)):
+    role = data.get("role")
+    user = db.query(User).filter(User.role == role).first()
+    if not user:
+        raise HTTPException(status_code=404, detail=f"No existing '{role}' account found to bypass into.")
+    return {
+        "message": "Bypass login successful",
+        "user_id": user.id,
+        "name": user.name,
+        "role": user.role,
+        "asset_class": user.asset_class,
+        "institution_name": user.institution_name
+    }
+# ══════════════════════════════════════════════════════════════════
+# END TEMPORARY BYPASS
+# ══════════════════════════════════════════════════════════════════
+
 # ── SUBMIT PORTFOLIO DATA ──
 @router.post("/submissions/submit")
 def submit_data(data: SubmissionCreate, db: Session = Depends(get_db)):
