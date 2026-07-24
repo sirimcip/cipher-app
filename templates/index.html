@@ -1688,8 +1688,13 @@
     }
   }
 
-  // ══ LOGIN ══
-  async function doLogin(role) {
+  // ══════════════════════════════════════════════════════════════════
+  // PAUSED — this is the real login (credentials + 2FA). Kept here,
+  // renamed, so it's a one-line swap to restore: rename this back to
+  // doLogin, delete the temporary doLogin() bypass below, and remove
+  // the /auth/bypass-login endpoint in routes.py.
+  // ══════════════════════════════════════════════════════════════════
+  async function doLoginReal(role) {
     const prefix  = role === 'investment_manager' ? 'inv' : 'mgr';
     const email    = document.getElementById(prefix + '-email').value;
     const password = document.getElementById(prefix + '-password').value;
@@ -1715,6 +1720,38 @@
       errorEl.textContent = "Could not connect to server."; errorEl.style.display = 'block';
     }
   }
+
+  // ══════════════════════════════════════════════════════════════════
+  // PAUSED — LOGIN BYPASS. This temporarily replaces doLogin() so the
+  // Sign In button on both portals logs straight into the one existing
+  // account for that role, with no credentials or 2FA required.
+  // To restore real login: delete this function, rename doLoginReal
+  // (above) back to doLogin, and remove /auth/bypass-login in routes.py.
+  // ══════════════════════════════════════════════════════════════════
+  async function doLogin(role) {
+    const errorEl = document.getElementById(role === 'investment_manager' ? 'inv-error' : 'mgr-error');
+    try {
+      const res = await fetch(`${API}/auth/bypass-login`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ role })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorEl.textContent = data.detail || "No existing account found for this role.";
+        errorEl.style.display = 'block';
+        return;
+      }
+      errorEl.style.display = 'none';
+      currentUser = { ...data, email: '' };
+      enterDashboard();
+    } catch (e) {
+      errorEl.textContent = "Could not connect to server.";
+      errorEl.style.display = 'block';
+    }
+  }
+  // ══════════════════════════════════════════════════════════════════
+  // END LOGIN BYPASS
+  // ══════════════════════════════════════════════════════════════════
 
   function enterDashboard() {
     if (currentUser.role === 'investment_manager') {
